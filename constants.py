@@ -113,6 +113,9 @@ plantStatus = {
     "berry": "berry",
     "wither": "wither"
 }
+objectStatus = {
+    "rock": 0
+}
 piece = 50
 food = 100
 

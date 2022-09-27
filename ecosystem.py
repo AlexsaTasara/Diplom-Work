@@ -40,17 +40,16 @@ class Ecosystem(pygame.sprite.Sprite):
         plnt1.placeAtMap(x, y, ind.mapNo)
         self.plants[plant.index] = plant
 
-    def addObject(self, game, x, y):
-        object = obj.MapObject(0)
-        object.placeAt(x, y)
-        object1 = obj.MapObject(0)
+    def addObject(self, game, x, y, type_o):
+        object11 = obj.ObjectInfo(game, type_o)
+        object11.placeAt(x, y)
+        object1 = obj.MapObject(game)
         if ind.objectInd < 1000000:
             ind.objectInd += 1
         else:
             ind.ObjectInd = 0
         object1.placeAt(x, y, ind.mapNo)
-        self.objects[object.index] = object
-
+        self.objects[object11.index] = object11
 
     # Функция удаления животного из экосистемы
     def delAnim(self, inds):
@@ -71,6 +70,16 @@ class Ecosystem(pygame.sprite.Sprite):
             flag_p.deleteAtMap(x_cur, y_cur, ind.mapNo)
         self.plants[inds].kill()
         del self.plants[inds]
+
+    # Функция удаления объекта из экосистемы
+    def delObject(self, inds):
+        x_cur = self.objects[inds].x
+        y_cur = self.objects[inds].y
+        flag_o = mapTileData[ind.mapNo].map[toIndex(x_cur, y_cur)].object
+        if flag_o is not None:
+            flag_o.deleteAtMap(x_cur, y_cur, ind.mapNo)
+        self.objects[inds].kill()
+        del self.objects[inds]
 
     # Функция нахождения индекса животного в массиве по заданным координатам
     def indAnim(self, a):
@@ -118,7 +127,7 @@ class Ecosystem(pygame.sprite.Sprite):
             for j in range(mapH[ind.mapNo] - 1):
                 plnt1.deleteAtMap(iii, j, ind.mapNo)
                 anim1.deleteAtMap(iii, j, ind.mapNo)
-                obj1.deleteAt(iii, j, ind.mapNo)
+                obj1.deleteAtMap(iii, j, ind.mapNo)
 
     # Функция возвращения индекса ближайшего врага-животного из списка для защиты
     def attacked(self, game, anim):

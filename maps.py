@@ -1,4 +1,6 @@
 import indexes as ind
+
+
 class Tile:
     def __init__(self, tx, ty, tt):
         self.x = tx

@@ -94,7 +94,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect.y = y * ind.tileH
 
 
-class groundTyle(pygame.sprite.Sprite):
+class GroundTyle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, nomer):
         self.groups = game.background_sprite
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -122,6 +122,7 @@ class Game:
         self.curs_sprites = None
         self.all_sprites = None
         self.mch_sprite = None
+        self.object_sprites = None
         self.mapTileData = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -192,6 +193,7 @@ class Game:
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pygame.sprite.Group()
         self.mch_sprite = pygame.sprite.Group()
+        self.object_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
         self.curs_sprites = pygame.sprite.Group()
         self.mapTileData = maps.mapTileData
@@ -208,7 +210,7 @@ class Game:
                 if (tile == 1) | (tile == 3) | (tile == 5) | (tile == 7):
                     Wall(self, col, row, tile)
                 if (tile == 0) | (tile == 2) | (tile == 4) | (tile == 6):
-                    groundTyle(self, col, row, tile)
+                    GroundTyle(self, col, row, tile)
                 if tile == 'P':
                     self.player = mch.Character(self)
                     self.player.placeAt(col, row)
@@ -237,6 +239,7 @@ class Game:
         self.all_sprites.update()
         self.mch_sprite.update()
         self.curs_sprites.update()
+        self.object_sprites.update()
 
     # Рисуем сетку
     def draw_grid(self):
@@ -278,6 +281,7 @@ class Game:
         self.draw_grid()
         self.background_sprite.draw(self.screen)
         self.all_sprites.draw(self.screen)
+        self.object_sprites.draw(self.screen)
         if ind.heroVisible:
             self.mch_sprite.draw(self.screen)
         if ind.clientSpawn | ind.objectSpawn | ind.plantSpawn | ind.animalSpawn | ind.info:
@@ -369,7 +373,7 @@ class Game:
                         ind.objectSpawn = False
                         ind.clientSpawn = False
                         ind.info = not ind.info
-                        if self.eco.animals.length == 0:
+                        if len(self.eco.animals) == 0:
                             ind.animInfo = False
                 # Смена языка
                 if (event.key == pygame.K_l) & (not ind.mapChange):
@@ -458,10 +462,10 @@ class Game:
                                     ind.heroVisible = False
                                     maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].user = None
                         if ind.objectSpawn:
-                            shadowRock = obj.MapObject(0)
+                            # shadowRock = obj.MapObject(0)
                             if (flagA is None) & (flagP is None) & (flagU is None):
                                 if flagO is None:
-                                    self.eco.addObject(xcur, ycur, ind.mapNo)
+                                    self.eco.addObject(self, xcur, ycur, 0)
                                     #shadowRock.placeAt(xcur, ycur, ind.mapNo)
                                 else:
                                     flagO.deleteAtMap(xcur, ycur, ind.mapNo)
@@ -748,7 +752,7 @@ class Game:
                 if (tile == 1) | (tile == 3) | (tile == 5) | (tile == 7):
                     Wall(self, col, row, tile)
                 if (tile == 0) | (tile == 2) | (tile == 4) | (tile == 6):
-                    groundTyle(self, col, row, tile)
+                    GroundTyle(self, col, row, tile)
 
 
 # Главное меню
