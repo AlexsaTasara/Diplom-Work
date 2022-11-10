@@ -88,7 +88,6 @@ class Animal(pygame.sprite.Sprite):
     #     self.rect = self.image.get_rect()
 
     def update(self):
-        #self.sprites_list = game.spritelist[self.ecoT]
         self.image = sprite_update(self.sprites_list, self.sprites[self.spriteDirect])
         color_image = changColor(self.image, self.color)
         self.image = color_image

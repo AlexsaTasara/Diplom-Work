@@ -28,6 +28,7 @@ screen_width = infoObject.current_w
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 
+# Функция настройки размера клетки.
 def set_tile_size(map_data):
     biggest_par = len(map_data)
     line_size = len(map_data[0])
@@ -53,6 +54,7 @@ clock = pygame.time.Clock()
 FPS = 30
 
 
+# Игрок (Стоит ли удалить?)
 class Player(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites
@@ -80,6 +82,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = self.y * ind.tileH
 
 
+# Стены
 class Wall(pygame.sprite.Sprite):
     def __init__(self, game, x, y, nomer):
         self.groups = game.background_sprite, game.walls
@@ -95,6 +98,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect.y = y * ind.tileH
 
 
+# Клетки земли
 class GroundTyle(pygame.sprite.Sprite):
     def __init__(self, game, x, y, nomer):
         self.groups = game.background_sprite
@@ -149,7 +153,6 @@ class Game:
             self.eco.loadObject(self, objj)
         for i in self.eco.objects:
             self.eco.objects[i].update()
-
 
     def load_data(self):
         game_folder = os.path.dirname(__file__)
@@ -417,7 +420,7 @@ class Game:
                     if (event.key == pygame.K_d) | (event.key == pygame.K_RIGHT):  # Вправо
                         if self.curs.canMoveRight():
                             self.curs.MoveRight()
-                    if (event.key == pygame.K_a) | (event.key == pygame.K_LEFT):  # влево
+                    if (event.key == pygame.K_a) | (event.key == pygame.KLEFT):  # влево
                         if self.curs.canMoveLeft():
                             self.curs.MoveLeft()
                     if (event.key == pygame.K_w) | (event.key == pygame.K_UP):  # Вверх
@@ -606,9 +609,7 @@ class Game:
                         self.load_save_file(ss1)
                 # Удаляем сохранение
                 if event.key == pygame.K_r:
-                   self.save.clearF(0)
-
-
+                    self.save.clearF(0)
 
                 if ind.heroVisible:
                     if event.key == pygame.K_ESCAPE:
@@ -678,7 +679,6 @@ class Game:
                         point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
                         if (point[0] != 0) & (point[1] != 0):
                             self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
-            h = 0
             # Обновление состояния растений
             listdelLater = []
             for h in self.eco.plants:
@@ -845,7 +845,7 @@ def main_menu():
                             pygame.quit()
                             quit()
 
-            # Main Menu UI
+            # UI Главного меню
             screen.fill(light_green)
             title = text_format("Модель искусственной жизни", font6, 50, blue)
             if selected == "start new":
@@ -871,7 +871,7 @@ def main_menu():
             sett_rect = text_sett.get_rect()
             quit_rect = text_quit.get_rect()
 
-            # Main Menu Text
+            # Текст главного меню
             screen.blit(title, (screen_width / 2 - (title_rect[2] / 2), 80))
             screen.blit(text_start, (screen_width / 2 - (start_rect[2] / 2), 200))
             screen.blit(text_load, (screen_width / 2 - (load_rect[2] / 2), 300))

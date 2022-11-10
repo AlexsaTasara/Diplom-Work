@@ -1,6 +1,4 @@
-import indexes as ind
 import random
-
 import maps
 import pointOfView as pov
 

@@ -265,27 +265,29 @@ class SavedData:
             oblist.append(an1)
         return oblist
 
+
 class SaveAndLoad:
     def __init__(self):
         self.files = {}
 
     def saveF(self, slot, eco):
         sd = SavedData(slot, eco)
+        self.files[slot] = sd
         with open('savefiles/savefile' + str(slot) + '.dat', 'wb') as f:
             pickle.dump([sd], f, protocol=2)
 
     def loadF(self, slot, eco):
-        sd = SavedData(slot, eco)
+        sd = self.files[slot]
         with open('savefiles/savefile' + str(slot) + '.dat', 'rb') as f:
             listsd = pickle.load(f)
         if not (listsd is None):
             sd.updateData(listsd[0])
-            #ss1 = sd.loadBack()
             return sd
         else:
             return "Пустое сохранение"
 
     def clearF(self, slot):
+        self.files[slot].kill()
         with open('savefiles/savefile' + str(slot) + '.dat', 'wb') as f:
             pickle.dump([], f, protocol=2)
 
