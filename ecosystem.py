@@ -27,6 +27,41 @@ class Ecosystem(pygame.sprite.Sprite):
         anim1.placeAtMap(x, y, ind.mapNo)
         self.animals[anim.index] = anim
 
+    def loadAnim(self, game, sanim):
+        anim = Animal(game)
+        anim.index = sanim.index
+        anim.color = sanim.color
+        anim.status = sanim.status
+        anim.ecoT = sanim.ecoT
+        anim.tileFrom = sanim.tileFrom
+        anim.tileTo = sanim.tileTo
+        anim.tilePurpose = sanim.tilePurpose
+        anim.courseLast = sanim.courseLast
+        anim.courseNext = sanim.courseNext
+        anim.liveTime = sanim.liveTime
+        anim.tYang = sanim.tYang
+        anim.told = sanim.told
+        anim.deathTime = sanim.deathTime
+        anim.tZero = sanim.tZero
+        anim.startEnergy = sanim.startEnergy
+        anim.energy = sanim.energy
+        anim.maxEnergy = sanim.maxEnergy
+        anim.stepEnergy = sanim.stepEnergy
+        anim.moveEnergy = sanim.moveEnergy
+        anim.sleepEnergy = sanim.sleepEnergy
+        anim.piece = sanim.piece
+        anim.food = sanim.food
+        anim.pAttackEnergy = sanim.pAttackEnergy
+        anim.pSpawnEnergy = sanim.pSpawnEnergy
+        anim.timeMoved = sanim.timeMoved
+        anim.delayMove = sanim.delayMove
+        anim.dimensions = sanim.dimensions
+        anim.position = sanim.position
+        anim.spriteDirect = sanim.spriteDirect
+        anim1 = AnimalObject(anim.index)
+        anim1.placeAtMap(anim.tileFrom[0], anim.tileFrom[1], ind.mapNo)
+        self.animals[anim.index] = anim
+
     # Функция добавления растения в экосистему
     def addPlant(self, game, x, y, c):
         plant = Plant(game)
@@ -40,6 +75,24 @@ class Ecosystem(pygame.sprite.Sprite):
         plnt1.placeAtMap(x, y, ind.mapNo)
         self.plants[plant.index] = plant
 
+    def loadPlant(self, game, splnt):
+        plant = Plant(game)
+        plant.X = splnt.X
+        plant.Y = splnt.Y
+        plant.index = splnt.index
+        plant.ecoT = splnt.ecoT
+        plant.liveTime = splnt.liveTime
+        plant.deathTime = splnt.deathTime
+        plant.berryTime = splnt.berryTime
+        plant.told = splnt.told
+        plant.piece = splnt.piece
+        plant.food = splnt.food
+        plant.status = splnt.status
+        plant.sprites = splnt.sprites
+        plnt1 = PlantObject(plant.index)
+        plnt1.placeAtMap(plant.X, plant.Y, ind.mapNo)
+        self.plants[plant.index] = plant
+
     def addObject(self, game, x, y, type_o):
         object11 = obj.ObjectInfo(game, type_o)
         object11.placeAt(x, y)
@@ -49,6 +102,16 @@ class Ecosystem(pygame.sprite.Sprite):
         else:
             ind.ObjectInd = 0
         object1.placeAt(x, y, ind.mapNo)
+        self.objects[object11.index] = object11
+
+    def loadObject(self, game, sobj):
+        object11 = obj.ObjectInfo(game, sobj.type)
+        object11.x = sobj.x
+        object11.y = sobj.y
+        object11.index = sobj.index
+        object11.sprites = sobj.sprites
+        object1 = obj.MapObject(game)
+        object1.placeAt(sobj.x, sobj.y, ind.mapNo)
         self.objects[object11.index] = object11
 
     # Функция удаления животного из экосистемы

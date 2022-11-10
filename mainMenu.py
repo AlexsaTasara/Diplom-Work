@@ -7,6 +7,7 @@ import maps
 import sys
 import cursor as curr
 import ecosystem as ecoo
+import saveAndLoad as sal
 import pointOfView as pov
 from strings import *
 import mainCharacter as mch
@@ -124,6 +125,7 @@ class Game:
         self.mch_sprite = None
         self.object_sprites = None
         self.mapTileData = None
+        self.save = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         self.screen = pygame.display.set_mode((screen_width, screen_height))
@@ -131,6 +133,23 @@ class Game:
         self.clock = pygame.time.Clock()
         pygame.key.set_repeat(500, 100)
         self.load_data()
+
+    def load_save_file(self, save1):
+        self.eco.clear()
+        save1.loadBack()
+        for annn in save1.animals:
+            self.eco.loadAnim(self, annn)
+        for i in self.eco.animals:
+            self.eco.animals[i].update()
+        for plll in save1.plants:
+            self.eco.loadPlant(self, plll)
+        for i in self.eco.plants:
+            self.eco.plants[i].update()
+        for objj in save1.objects:
+            self.eco.loadObject(self, objj)
+        for i in self.eco.objects:
+            self.eco.objects[i].update()
+
 
     def load_data(self):
         game_folder = os.path.dirname(__file__)
@@ -201,6 +220,7 @@ class Game:
 
         self.eco = ecoo.Ecosystem()
         self.view = pov.PointOfView()
+        self.save = sal.SaveAndLoad()
 
         currentmap = maps.gameMap[ind.mapNo]
         ind.tileW, ind.tileH = set_tile_size(currentmap)
@@ -257,7 +277,7 @@ class Game:
         text6 = text_format("Виден пользователь: " + str(ind.heroVisible), font6, 20, white)
         text7 = text_format("Число живолотных: " + str(len(self.eco.animals)), font6, 20, white)
         text8 = text_format("Число растений: " + str(len(self.eco.plants)), font6, 20, white)
-        # text9 = text_format("Число объектов: " + str(ind.heroVisible), font6, 20, white)
+        text9 = text_format("Число объектов: " + str(len(self.eco.objects)), font6, 20, white)
         title_rect1 = text1.get_rect()
         title_rect2 = text2.get_rect()
         title_rect3 = text3.get_rect()
@@ -266,6 +286,7 @@ class Game:
         title_rect6 = text6.get_rect()
         title_rect7 = text7.get_rect()
         title_rect8 = text8.get_rect()
+        title_rect9 = text9.get_rect()
         screen.blit(text1, (screen_width / 2 + (title_rect1[2] / 2), 80))
         screen.blit(text2, (screen_width / 2 + (title_rect2[2] / 2), 110))
         screen.blit(text3, (screen_width / 2 + (title_rect3[2] / 2), 140))
@@ -274,6 +295,7 @@ class Game:
         screen.blit(text6, (screen_width / 2 + (title_rect6[2] / 2), 230))
         screen.blit(text7, (screen_width / 2 + (title_rect7[2] / 2), 260))
         screen.blit(text8, (screen_width / 2 + (title_rect8[2] / 2), 290))
+        screen.blit(text9, (screen_width / 2 + (title_rect9[2] / 2), 320))
 
     # Рисуем экран
     def draw(self):
@@ -294,8 +316,9 @@ class Game:
 
     # Ивенты клавиатуры
     def events(self):
-        # catch all events here
+        # Ловим все ивенты здесь
         for event in pygame.event.get():
+            # Закрытие приложения
             if event.type == pygame.QUIT:
                 self.quit()
             if event.type == pygame.KEYDOWN:
@@ -403,37 +426,45 @@ class Game:
                     if (event.key == pygame.K_s) | (event.key == pygame.K_DOWN):  # Вниз
                         if self.curs.canMoveDown():
                             self.curs.MoveDown()
+                    # Выбираем цвет животного
                     if ind.animalSpawn:
+                        # Красный
                         if event.key == pygame.K_1:
                             ind.chosenColorInd = "RED"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Зеленый
                         if event.key == pygame.K_2:
                             ind.chosenColorInd = "GREEN"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Синий
                         if event.key == pygame.K_3:
                             ind.chosenColorInd = "BLUE"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Желтый
                         if event.key == pygame.K_4:
                             ind.chosenColorInd = "YELLOW"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Розовый
                         if event.key == pygame.K_5:
                             ind.chosenColorInd = "PINK"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Голубой
                         if event.key == pygame.K_6:
                             ind.chosenColorInd = "LIGHTBLUE"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
+                        # Белый
                         if event.key == pygame.K_7:
                             ind.chosenColorInd = "WHITE"
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
 
-                    if (event.key == pygame.K_h) & (ind.animalSpawn | ind.plantSpawn):  # Вниз
+                    if (event.key == pygame.K_h) & (ind.animalSpawn | ind.plantSpawn):  # Вид экосистемы
                         if ind.et == 0:
                             ind.et = 1
                         else:
@@ -489,6 +520,7 @@ class Game:
                                     else:
                                         flagP.deleteAtMap(xcur, ycur, ind.mapNo)
                                         self.eco.delPlant(flagP.index)
+                # Меняем карту
                 if ind.mapChange:
                     if event.key == pygame.K_q:
                         ind.mapChange = not ind.mapChange
@@ -522,6 +554,7 @@ class Game:
                             ind.mapCh -= 1
                         else:
                             ind.mapCh = 9
+                    # Выбрали карту
                     if event.key == pygame.K_e:
                         self.curs.placeAt(0, 0)
                         ind.mapChange = False
@@ -559,9 +592,23 @@ class Game:
                                                                  self.player.tileTo[1])].user = None
                     ind.pastSpeed = 1
                     ind.currentSpeed = 0
-
+                # Закрыть программу
                 if event.key == pygame.K_ESCAPE:
                     self.quit()
+
+                # Сохраняем модель
+                if event.key == pygame.K_f:
+                    self.save.saveF(0, self.eco)
+                # Загружаем модель
+                if event.key == pygame.K_g:
+                    ss1 = self.save.loadF(0, self.eco)
+                    if ss1 != "Пустое сохранение":
+                        self.load_save_file(ss1)
+                # Удаляем сохранение
+                if event.key == pygame.K_r:
+                   self.save.clearF(0)
+
+
 
                 if ind.heroVisible:
                     if event.key == pygame.K_ESCAPE:
