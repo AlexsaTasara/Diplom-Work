@@ -3,6 +3,11 @@ lang = {
     "ENG": 1
 }
 
+stmodelname = [
+    "Модель искусственной жизни",
+    "Artificial life model."
+]
+
 stchosemapInf = [
     "Выберете карту используя стрелки вправо-влево.",
     "Chose map by using left-right arrow keys."

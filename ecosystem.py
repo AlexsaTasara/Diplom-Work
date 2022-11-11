@@ -121,6 +121,7 @@ class Ecosystem(pygame.sprite.Sprite):
         flag_a = mapTileData[ind.mapNo].map[toIndex(x_cur, y_cur)].animal
         if flag_a is not None:
             flag_a.deleteAtMap(x_cur, y_cur, ind.mapNo)
+        # Удаляем спрайт
         self.animals[inds].kill()
         del self.animals[inds]
 

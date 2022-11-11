@@ -165,6 +165,7 @@ class Animal(pygame.sprite.Sprite):
         color_image = changColor(self.image, self.color)
         self.image = color_image
         self.rect = self.image.get_rect()
+        # print("Рожден: ", self.index, ", Энергии: ", self.energy, ", ", self.maxEnergy, "Макс возраст: ", self.told)
 
     # Неудачное рождение особи
     def abortion(self):
@@ -221,10 +222,10 @@ class Animal(pygame.sprite.Sprite):
     def timeUpdate(self):
         self.liveTime += 1
         if (self.status == statusAnim["SLEEP"]) | (self.status == statusAnim["EAT"]):
-            self.energy -= self.sleepEnergy
+            self.energy = (self.energy - self.sleepEnergy)
         else:
             if (self.status == statusAnim["ATTACK"]) | (self.status == statusAnim["WALK"]):
-                self.energy -= self.moveEnergy
+                self.energy = (self.energy - self.moveEnergy)
         if self.energy <= 0:
             self.status = statusAnim["DEATH"]
             self.spriteDirect = animalSprite["dead"]
@@ -233,7 +234,7 @@ class Animal(pygame.sprite.Sprite):
                 return False
             return True
         if self.liveTime <= self.tYang:
-            self.maxEnergy += self.stepEnergy
+            self.maxEnergy = (self.maxEnergy + self.stepEnergy)
         if self.liveTime > self.told:
             self.moveEnergy += 1
             self.sleepEnergy += 1
@@ -241,7 +242,7 @@ class Animal(pygame.sprite.Sprite):
 
     # Проверка голода
     def hungry(self):
-        return ((self.maxEnergy - self.energy) >= 50)
+        return (self.maxEnergy - self.energy) >= 50
 
     # Проверка много ли энергии
     def fewEnergy(self):

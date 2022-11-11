@@ -327,16 +327,7 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 # Остановка / Запуск модели
                 if event.key == pygame.K_z:
-                    if ind.currentSpeed != 0:
-                        ind.pastSpeed = ind.currentSpeed
-                        ind.currentSpeed = 0
-                    else:
-                        ind.currentSpeed = ind.pastSpeed
-                        ind.clientSpawn = False
-                        ind.objectSpawn = False
-                        ind.animalSpawn = False
-                        ind.plantSpawn = False
-                        ind.mapChange = False
+                    stop_start_model()
                 # Изменение скорости появления растений в воде
                 if event.key == pygame.K_k:
                     if ind.PLW == 4:
@@ -420,7 +411,7 @@ class Game:
                     if (event.key == pygame.K_d) | (event.key == pygame.K_RIGHT):  # Вправо
                         if self.curs.canMoveRight():
                             self.curs.MoveRight()
-                    if (event.key == pygame.K_a) | (event.key == pygame.KLEFT):  # влево
+                    if (event.key == pygame.K_a) | (event.key == pygame.K_LEFT):  # влево
                         if self.curs.canMoveLeft():
                             self.curs.MoveLeft()
                     if (event.key == pygame.K_w) | (event.key == pygame.K_UP):  # Вверх
@@ -698,18 +689,45 @@ class Game:
 
             hlist = self.eco.animals
             keylisth = hlist.copy().keys()
-            flaglist = True
-            while flaglist:
-                flaglist = False
-                for h in keylisth:
-                    if not self.eco.animals[h].timeUpdate():
-                        self.eco.delAnim(self.eco.animals[h].index)
-                        continue
-                    stat = self.eco.animals[h].status
-                    if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
-                        self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
-                        self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
-                        stat = self.eco.choosePurpose(self, h)
+            for h in keylisth:
+                # if h == 30:
+                #     print("Существо: ", self.eco.animals[h].index,
+                #           ", Энергия, начальная, макс: ",
+                #           self.eco.animals[h].energy, ", ",
+                #           self.eco.animals[h].startEnergy, ", ",
+                #           self.eco.animals[h].maxEnergy, ", ",
+                #           "Макс возраст и возраст: ",
+                #           self.eco.animals[h].told, " ",
+                #           self.eco.animals[h].liveTime, " ",
+                #           )
+                if not self.eco.animals[h].timeUpdate():
+                    print("Умер: ", self.eco.animals[h].index,)
+                    # print("Умер: ", self.eco.animals[h].index,
+                    #       ", Энергия, начальная, макс: ",
+                    #       self.eco.animals[h].energy, ", ",
+                    #       self.eco.animals[h].startEnergy, ", ",
+                    #       self.eco.animals[h].maxEnergy, ", ",
+                    #       "Шаг, Движение, сон: ",
+                    #       self.eco.animals[h].stepEnergy, ", ",
+                    #       self.eco.animals[h].moveEnergy, ", ",
+                    #       self.eco.animals[h].sleepEnergy, ", ",
+                    #       "Макс возраст и возраст: ",
+                    #       self.eco.animals[h].told, " ",
+                    #       self.eco.animals[h].liveTime, " ",
+                    #       "Возраст смерти и возраст zero: ",
+                    #       self.eco.animals[h].deathTime, " ",
+                    #       self.eco.animals[h].tZero, " ",
+                    #       "Энергия атаки и рождения: ",
+                    #       self.eco.animals[h].pAttackEnergy, " ",
+                    #       self.eco.animals[h].pSpawnEnergy, " ",
+                    #       )
+                    self.eco.delAnim(self.eco.animals[h].index)
+                    continue
+                stat = self.eco.animals[h].status
+                if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
+                    self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
+                    self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
+                    stat = self.eco.choosePurpose(self, h)
                 # newlisttt = []
                 # for hh in self.eco.animals.keys():
                 #     if hh not in keylisth:
@@ -800,6 +818,21 @@ class Game:
                     Wall(self, col, row, tile)
                 if (tile == 0) | (tile == 2) | (tile == 4) | (tile == 6):
                     GroundTyle(self, col, row, tile)
+        # self.curs.update()
+
+
+# Функция остановки / запуска модели
+def stop_start_model():
+    if ind.currentSpeed != 0:
+        ind.pastSpeed = ind.currentSpeed
+        ind.currentSpeed = 0
+    else:
+        ind.currentSpeed = ind.pastSpeed
+        ind.clientSpawn = False
+        ind.objectSpawn = False
+        ind.animalSpawn = False
+        ind.plantSpawn = False
+        ind.mapChange = False
 
 
 # Главное меню
@@ -847,7 +880,7 @@ def main_menu():
 
             # UI Главного меню
             screen.fill(light_green)
-            title = text_format("Модель искусственной жизни", font6, 50, blue)
+            title = text_format(stmodelname[ind.userLang], font6, 50, blue)
             if selected == "start new":
                 text_start = text_format("Новая модель", font1, 75, white)
             else:
@@ -879,7 +912,7 @@ def main_menu():
             screen.blit(text_quit, (screen_width / 2 - (quit_rect[2] / 2), 500))
             pygame.display.update()
             clock.tick(FPS)
-            pygame.display.set_caption("Модель искусственной жизни")
+            pygame.display.set_caption(stmodelname[ind.userLang])
         # Рисование модели
 
 

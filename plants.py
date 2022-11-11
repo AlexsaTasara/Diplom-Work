@@ -30,7 +30,7 @@ class Plant(pygame.sprite.Sprite):
 
         # Еда
         self.piece = 50
-        self.food = 100
+        self.food = 150
         self.status = plantStatus["sprout"]
 
         self.sprites = {

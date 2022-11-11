@@ -69,10 +69,12 @@ class ObjectInfo(pygame.sprite.Sprite):
         }
 
         # Спрайты
+
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.sprites_list = game.spritelist["rock"]
+        self.image = sprite_update(self.sprites_list, self.sprites[self.type])
 
     def placeAt(self, nx, ny):
         self.x = nx
