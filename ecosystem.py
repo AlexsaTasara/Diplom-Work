@@ -195,46 +195,60 @@ class Ecosystem(pygame.sprite.Sprite):
 
     # Функция возвращения индекса ближайшего врага-животного из списка для защиты
     def attacked(self, game, anim):
-        iii = 0
+        iii = -1
         for j in game.view.nearAnim:
             indexA = self.lookAnim(j)
-            if ((anim.enemy(self.animals[indexA])) & (self.animals[indexA].status != statusAnim["DEATH"]) & (
-                    self.animals[indexA].status != statusAnim["ZERO"])):
-                break
-            iii += 1
+            aa1 = anim.enemy(self.animals[indexA])
+            aa2 = self.animals[indexA].status != statusAnim["DEATH"]
+            aa3 = self.animals[indexA].status != statusAnim["ZERO"]
+            if aa1 & aa2 & aa3:
+                iii = indexA
+                return iii
         return iii
 
     # Функция возвращения индекса ближайшего врага-животного из списка для атаки
     def attack(self, game, anim):
-        iii = 0
+        iii = -1
         for j in game.view.nearAnim:
             indexA = self.lookAnim(j)
-            if anim.enemy(self.animals[indexA]) & (self.animals[indexA].status != statusAnim["DEATH"]) \
-                    & (self.animals[indexA].status != statusAnim["ZERO"]):
-                break
-            iii += 1
+            aa1 = anim.enemy(self.animals[indexA])
+            aa2 = self.animals[indexA].status != statusAnim["DEATH"]
+            aa3 = self.animals[indexA].status != statusAnim["ZERO"]
+            if aa1 & aa2 & aa3:
+                iii = indexA
+                return iii
         return iii
+
+
+
+
+    # -------------------- Ошибка в spawn!
+
+
 
     # Функция возвращения индекса ближайшего не врага-животного с которым можно спариться.
     def spawn(self, game, anim):
-        iii = 0
+        iii = -1
         for j in game.view.nearAnim:
             indexA = self.lookAnim(j)
             anim1 = self.animals[indexA]
-            if (not (anim.enemy(anim1)) & (anim1.status != statusAnim["DEATH"]) & (anim1.status != statusAnim["ZERO"])
-                    & (anim1.liveTime > anim1.tYang)):
-                break
-            iii += 1
+            aa1 = not (anim.enemy(anim1))
+            aa2 = anim1.status != statusAnim["DEATH"]
+            aa3 = anim1.status != statusAnim["ZERO"]
+            aa4 = anim1.liveTime > anim1.tYang
+            if aa1 & aa2 & aa3 & aa4:
+                iii = indexA
+                return iii
         return iii
 
     # Функция возвращения индекса ближайшего мертвого животного из списка
     def eat(self, game):
-        iii = 0
+        iii = -1
         for j in game.view.nearAnim:
             indexA = self.lookAnim(j)
             if self.animals[indexA].status == statusAnim["DEATH"]:
-                break
-            iii += 1
+                iii = indexA
+                return iii
         return iii
 
     # Функция выбора в какую сторону смотреть
@@ -256,8 +270,9 @@ class Ecosystem(pygame.sprite.Sprite):
                 nx = math.floor(dx / abs(dx))
             if dy != 0:
                 ny = math.floor(dy / abs(dy))
-            if (dx != 0) & (dy != 0) & (game.view.lookTile[pos2[0]][pos2[1] - ny] == statusCell["CLEAR"]) \
-                    & (game.view.lookTile[pos2[0] - nx][pos2[1]] == statusCell["CLEAR"]):
+            aa1 = (game.view.lookTile[pos2[0]][pos2[1] - ny] == statusCell["CLEAR"])
+            aa2 = (game.view.lookTile[pos2[0] - nx][pos2[1]] == statusCell["CLEAR"])
+            if (dx != 0) & (dy != 0) & aa1 & aa2:
                 if (myCourse % 2) != 0:
                     pos3 = [pos2[0], pos2[1] - ny]
                 else:
@@ -304,8 +319,8 @@ class Ecosystem(pygame.sprite.Sprite):
     # Функция выбора цели для существа
     def choosePurpose(self, game, iii):  # i - индекс существа в массиве
         j = self.attacked(game, self.animals[iii])  # DEFENSE and ATTACK
-        if j < len(game.view.nearAnim):
-            indexA = self.lookAnim(game.view.nearAnim[j])
+        if j >= 0:
+            indexA = j
             delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) + \
                 abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
             if delta < 2:
@@ -334,8 +349,8 @@ class Ecosystem(pygame.sprite.Sprite):
                     food = self.plants[indexP].eat()
                     return statusAnim["EAT"]
             j = self.eat(game)
-            if j < len(game.view.nearAnim):
-                indexA = self.lookAnim(game.view.nearAnim[j])
+            if j >= 0:
+                indexA = j
                 poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
                 poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
                 if not (self.lookWay(game, iii, [poX, poY])):
@@ -344,8 +359,8 @@ class Ecosystem(pygame.sprite.Sprite):
                     return statusAnim["EAT"]
 
         j = self.attack(game, self.animals[iii])  # WALK->ATTACK
-        if self.animals[iii].attackEnergy() & (j < len(game.view.nearAnim)):
-            indexA = self.lookAnim(game.view.nearAnim[j])
+        if self.animals[iii].attackEnergy() & (j >= 0):
+            indexA = j
             poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
             poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
             self.lookWay(game, iii, [poX, poY])
@@ -359,14 +374,23 @@ class Ecosystem(pygame.sprite.Sprite):
             return statusAnim["WALK"]
 
         j = self.spawn(game, self.animals[iii])  # SPAWN and WALK->SPAWN
-        if self.animals[iii].spawnEnergy() & (j < len(game.view.nearAnim)):
-            indexA = self.lookAnim(game.view.nearAnim[j])
+        if self.animals[iii].spawnEnergy() & (j >= 0):
+            indexA = j
+            # indexA = self.lookAnim(game.view.nearAnim[j])
             delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
                 + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
             if delta < 2:
                 if len(game.view.nearClear) == 0:
                     self.animals[iii].abortion()
                 else:
+                    print(ind.tak)
+                    print("Родитель 1 : ", self.animals[iii].index, ", Энергии: ", self.animals[iii].energy,
+                          ", ", self.animals[iii].maxEnergy, ", Возраст: ", self.animals[iii].liveTime,
+                          ", Позиция: ", self.animals[iii].tileFrom)
+                    print("Родитель 2 : ", self.animals[indexA].index, ", Энергии: ", self.animals[indexA].energy,
+                          ", ", self.animals[indexA].maxEnergy, ", Возраст: ", self.animals[indexA].liveTime,
+                          ", Позиция: ", self.animals[indexA].tileFrom)
+
                     animbaby = Animal(game)
                     animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
                                   game.view.nearClear[0][1])
@@ -378,7 +402,14 @@ class Ecosystem(pygame.sprite.Sprite):
                     shadAnim = AnimalObject(animbaby.index)
                     shadAnim.placeAtMap(animbaby.tileTo[0], animbaby.tileTo[1], ind.mapNo)
                     self.animals[iii].birth(animbaby)
-                self.animals[iii].tilePurpose = self.animals[iii].tileTo = self.animals[iii].tileFrom
+                    print("Родитель 1 после родов: ", self.animals[iii].index, ", Энергии: ", self.animals[iii].energy,
+                          ", ", self.animals[iii].maxEnergy)
+                    print("Родитель 2 после родов: ", self.animals[indexA].index, ", Энергии: ",
+                          self.animals[indexA].energy,
+                          ", ", self.animals[indexA].maxEnergy)
+                    print()
+                self.animals[iii].tilePurpose = self.animals[iii].tileFrom
+                self.animals[iii].tileTo = self.animals[iii].tileFrom
                 self.animals[iii].courseNext = self.animals[iii].courseLast
                 return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
             poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
@@ -401,8 +432,8 @@ class Ecosystem(pygame.sprite.Sprite):
             if len(game.view.nearFood) != 0:
                 df = abs(game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]) \
                      + abs(game.view.nearFood[0][1] - self.animals[iii].tileFrom[1])
-            if j < len(game.view.nearAnim):
-                indexA = self.lookAnim(game.view.nearAnim[j])
+            if j >= 0:
+                indexA = j
                 db = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
                     + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
             if (df < 100) | (db < 100):
@@ -411,7 +442,7 @@ class Ecosystem(pygame.sprite.Sprite):
                     poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
                     self.lookWay(game, iii, [poX, poY])
                 else:
-                    indexA = self.lookAnim(game.view.nearAnim[j])
+                    indexA = j
                     poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
                     poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
                     self.lookWay(game, iii, [poX, poY])

@@ -165,15 +165,15 @@ class Animal(pygame.sprite.Sprite):
         color_image = changColor(self.image, self.color)
         self.image = color_image
         self.rect = self.image.get_rect()
-        # print("Рожден: ", self.index, ", Энергии: ", self.energy, ", ", self.maxEnergy, "Макс возраст: ", self.told)
+        print("Рожден: ", self.index, ", Энергии: ", self.energy, ", ", self.maxEnergy, "Макс возраст: ", self.told)
 
     # Неудачное рождение особи
     def abortion(self):
-        self.energy -= self.startEnergy
+        self.energy = self.energy - self.startEnergy
 
     # Затрата энергии на рождение новой особи
     def birth(self, anim):
-        self.energy -= anim.startEnergy
+        self.energy = self.energy - anim.startEnergy
 
     # Животное атаковали
     def attacked(self):

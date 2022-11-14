@@ -689,6 +689,16 @@ class Game:
 
             hlist = self.eco.animals
             keylisth = hlist.copy().keys()
+            # for h in keylisth:
+            #     if not self.eco.animals[h].timeUpdate():
+            #         self.eco.delAnim(self.eco.animals[h].index)
+            #         continue
+            #     stat = self.eco.animals[h].status
+            #     if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
+            #         self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
+            #         self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
+            #         stat = self.eco.choosePurpose(self, h)
+
             for h in keylisth:
                 # if h == 30:
                 #     print("Существо: ", self.eco.animals[h].index,
@@ -701,7 +711,7 @@ class Game:
                 #           self.eco.animals[h].liveTime, " ",
                 #           )
                 if not self.eco.animals[h].timeUpdate():
-                    print("Умер: ", self.eco.animals[h].index,)
+                    print("Умер: ", self.eco.animals[h].index, )
                     # print("Умер: ", self.eco.animals[h].index,
                     #       ", Энергия, начальная, макс: ",
                     #       self.eco.animals[h].energy, ", ",
@@ -722,12 +732,15 @@ class Game:
                     #       self.eco.animals[h].pSpawnEnergy, " ",
                     #       )
                     self.eco.delAnim(self.eco.animals[h].index)
-                    continue
+            hlist = self.eco.animals
+            keylisth = hlist.copy().keys()
+            for h in keylisth:
                 stat = self.eco.animals[h].status
                 if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
                     stat = self.eco.choosePurpose(self, h)
+
                 # newlisttt = []
                 # for hh in self.eco.animals.keys():
                 #     if hh not in keylisth:
