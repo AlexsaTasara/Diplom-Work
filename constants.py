@@ -136,6 +136,11 @@ plantType = {
     "Water": "plant_water"
 }
 
+objectCollision = {
+    "none": 0,
+    "solid": 1,
+    "moveable": 2
+}
 
 # Направления
 directions = {

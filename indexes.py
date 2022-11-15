@@ -54,7 +54,6 @@ ctx = None
 
 # Какой режим включен
 mapChange = True
-clientSpawn = False
 objectSpawn = False
 animalSpawn = False
 plantSpawn = False

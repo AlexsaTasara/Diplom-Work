@@ -129,7 +129,6 @@ class SavedData:
 
         # Какой режим включен
         self.mapChange = ind.mapChange
-        self.clientSpawn = ind.clientSpawn
         self.objectSpawn = ind.objectSpawn
         self.animalSpawn = ind.animalSpawn
         self.plantSpawn = ind.plantSpawn
@@ -173,7 +172,6 @@ class SavedData:
         self.prewLoc = llll.prewLoc
         self.ctx = llll.ctx
         self.mapChange = llll.mapChange
-        self.clientSpawn = llll.clientSpawn
         self.objectSpawn = llll.objectSpawn
         self.animalSpawn = llll.animalSpawn
         self.plantSpawn = llll.plantSpawn
@@ -235,7 +233,6 @@ class SavedData:
 
         # Какой режим включен
         ind.mapChange = self.mapChange
-        ind.clientSpawn = self.clientSpawn
         ind.objectSpawn = self.objectSpawn
         ind.animalSpawn = self.animalSpawn
         ind.plantSpawn = self.plantSpawn

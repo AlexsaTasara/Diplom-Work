@@ -161,16 +161,3 @@ class Character(pygame.sprite.Sprite):
             return self.MoveLeft(t)
         if d == directions.right:
             return self.MoveRight(t)
-
-    # Хмм, может стоит удалить
-    # def pickUp(self):
-    #     if self.tileTo[0] != self.tileFrom[0] | self.tileTo[1] != self.tileFrom[1]:
-    #         return False
-    #     iss = mapTileData.map[toIndex(self.tileFrom[0], self.tileFrom[1])].itemStack
-    #     if iss != None:
-    #         remains = self.inventory.addItems( iss.type, iss.qty)
-    #         if remains:
-    #             iss.qty = remains
-    #         else:
-    #             mapTileData.map[toIndex(self.ti)][toIndex(self.tileFrom[0], self.tileFrom[1])].itemStack = None
-    #     return True

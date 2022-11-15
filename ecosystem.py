@@ -394,6 +394,7 @@ class Ecosystem(pygame.sprite.Sprite):
                     animbaby = Animal(game)
                     animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
                                   game.view.nearClear[0][1])
+                    animbaby.ecoAddType(self.animals[iii].ecoT, game)
                     if ind.animalInd < 1000000:
                         ind.animalInd += 1
                     else:

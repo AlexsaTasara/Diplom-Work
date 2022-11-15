@@ -4,12 +4,6 @@ import pygame
 from constants import *
 import sprite_sheet as spsh
 
-objectCollision = {
-    "none": 0,
-    "solid": 1,
-    "moveable": 2
-}
-
 objectTypes = {
     0: {
         # Камень
@@ -69,7 +63,6 @@ class ObjectInfo(pygame.sprite.Sprite):
         }
 
         # Спрайты
-
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.game = game
