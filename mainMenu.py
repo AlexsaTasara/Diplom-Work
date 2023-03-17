@@ -15,6 +15,7 @@ import mainCharacter as mch
 import objects as obj
 import random_new as rnd
 import time
+import xlsxwriter
 
 # Инициализация игры
 pygame.init()
@@ -94,6 +95,12 @@ class Game:
         self.object_sprites = None
         self.mapTileData = None
         self.save = None
+        self.workbook = None
+        self.worksheetEnergy = None
+        self.worksheetMaxEnergy = None
+        self.worksheetLiveTime = None
+        self.worksheetStatus = None
+        self.eCol = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         self.screen = pygame.display.set_mode((screen_width, screen_height))
@@ -188,6 +195,11 @@ class Game:
         self.eco = ecoo.Ecosystem()
         self.view = pov.PointOfView()
         self.save = sal.SaveAndLoad()
+        self.workbook = xlsxwriter.Workbook('AgentsStatuses.xlsx')
+        self.worksheetEnergy = self.workbook.add_worksheet()
+        self.worksheetMaxEnergy = self.workbook.add_worksheet()
+        self.worksheetLiveTime = self.workbook.add_worksheet()
+        self.worksheetStatus = self.workbook.add_worksheet()
 
         currentmap = maps.gameMap[ind.mapNo]
         ind.tileW, ind.tileH = set_tile_size(currentmap)
@@ -204,6 +216,7 @@ class Game:
     # Для завершения программы playing = False
     def run(self):
         self.playing = True
+        self.eCol = 0
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
@@ -213,6 +226,7 @@ class Game:
 
     # Выход из программы
     def quit(self):
+        self.workbook.close()
         pygame.quit()
         sys.exit()
 
@@ -621,6 +635,11 @@ class Game:
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
                     stat = self.eco.choosePurpose(self, h)
+                    self.worksheetEnergy.write(h, self.eCol, self.eco.animals[h].energy)
+                    self.worksheetMaxEnergy.write(h, self.eCol, self.eco.animals[h].maxEnergy)
+                    self.worksheetLiveTime.write(h, self.eCol, self.eco.animals[h].liveTime)
+                    self.worksheetStatus.write(h, self.eCol, self.eco.animals[h].status)
+            self.eCol = self.eCol + 1
 
                 # newlisttt = []
                 # for hh in self.eco.animals.keys():
