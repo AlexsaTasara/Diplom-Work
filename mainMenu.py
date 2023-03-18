@@ -100,6 +100,7 @@ class Game:
         self.worksheetMaxEnergy = None
         self.worksheetLiveTime = None
         self.worksheetStatus = None
+        self.worksheetNumbers = None
         self.eCol = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -200,6 +201,7 @@ class Game:
         self.worksheetMaxEnergy = self.workbook.add_worksheet()
         self.worksheetLiveTime = self.workbook.add_worksheet()
         self.worksheetStatus = self.workbook.add_worksheet()
+        self.worksheetNumbers = self.workbook.add_worksheet()
 
         currentmap = maps.gameMap[ind.mapNo]
         ind.tileW, ind.tileH = set_tile_size(currentmap)
@@ -639,6 +641,7 @@ class Game:
                     self.worksheetMaxEnergy.write(h, self.eCol, self.eco.animals[h].maxEnergy)
                     self.worksheetLiveTime.write(h, self.eCol, self.eco.animals[h].liveTime)
                     self.worksheetStatus.write(h, self.eCol, self.eco.animals[h].status)
+            self.worksheetNumbers.write(0, self.eCol, len(self.eco.animals))
             self.eCol = self.eCol + 1
 
                 # newlisttt = []
