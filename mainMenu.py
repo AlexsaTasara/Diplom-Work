@@ -208,9 +208,9 @@ class Game:
         self.spriteupdate()
         for row, tiles in enumerate(currentmap):
             for col, tile in enumerate(tiles):
-                if (tile == 1) | (tile == 3) | (tile == 5) | (tile == 7):
+                if (tile == 1) or (tile == 3) or (tile == 5) or (tile == 7):
                     Wall(self, col, row, tile)
-                if (tile == 0) | (tile == 2) | (tile == 4) | (tile == 6):
+                if (tile == 0) or (tile == 2) or (tile == 4) or (tile == 6):
                     GroundTyle(self, col, row, tile)
         # self.player.placeAt(2, 2)
         self.curs = curr.Cursor(self)
@@ -253,7 +253,7 @@ class Game:
         self.background_sprite.draw(self.screen)
         self.all_sprites.draw(self.screen)
         self.object_sprites.draw(self.screen)
-        if ind.objectSpawn | ind.plantSpawn | ind.animalSpawn | ind.info:
+        if ind.objectSpawn or ind.plantSpawn or ind.animalSpawn or ind.info:
             self.curs_sprites.draw(self.screen)
         type_texts(self, screen, screen_width)
         # self.type_texts()
@@ -286,7 +286,7 @@ class Game:
                     else:
                         ind.PLT += 1
                 # Добавление / Удаление животных
-                if (event.key == pygame.K_i) & (not ind.mapChange) & (ind.currentSpeed == 0):
+                if (event.key == pygame.K_i) and (not ind.mapChange) and (ind.currentSpeed == 0):
                     if ind.animalSpawn:
                         ind.animalSpawn = not ind.animalSpawn
                     else:
@@ -295,7 +295,7 @@ class Game:
                         ind.objectSpawn = False
                         ind.info = False
                 # Добавление / Удаление растений
-                if (event.key == pygame.K_p) & (not ind.mapChange) & (ind.currentSpeed == 0):
+                if (event.key == pygame.K_p) and (not ind.mapChange) and (ind.currentSpeed == 0):
                     if ind.plantSpawn:
                         ind.plantSpawn = not ind.plantSpawn
                     else:
@@ -304,7 +304,7 @@ class Game:
                         ind.objectSpawn = False
                         ind.info = False
                 # Добавление / Удаление объектов
-                if (event.key == pygame.K_o) & (not ind.mapChange) & (ind.currentSpeed == 0):
+                if (event.key == pygame.K_o) and (not ind.mapChange) and (ind.currentSpeed == 0):
                     if ind.objectSpawn:
                         ind.objectSpawn = not ind.objectSpawn
                     else:
@@ -313,7 +313,7 @@ class Game:
                         ind.objectSpawn = not ind.objectSpawn
                         ind.info = False
                 # Информация
-                if (event.key == pygame.K_y) & (not ind.mapChange):
+                if (event.key == pygame.K_y) and (not ind.mapChange):
                     if ind.info:
                         ind.info = not ind.info
                     else:
@@ -324,30 +324,30 @@ class Game:
                         if len(self.eco.animals) == 0:
                             ind.animInfo = False
                 # Смена языка
-                if (event.key == pygame.K_l) & (not ind.mapChange):
+                if (event.key == pygame.K_l) and (not ind.mapChange):
                     if ind.userLang < lang["ENG"]:
                         ind.userLang += 1
                     else:
                         ind.userLang = 0
                 # Смена карты
-                if (event.key == pygame.K_m) & (not ind.mapChange) & (ind.currentSpeed == 0):
+                if (event.key == pygame.K_m) and (not ind.mapChange) and (ind.currentSpeed == 0):
                     ind.mapChange = not ind.mapChange
                     ind.animalSpawn = False
                     ind.plantSpawn = False
                     ind.objectSpawn = False
                     ind.info = False
                 # Перемещение курсора
-                if ind.objectSpawn | ind.animalSpawn | ind.plantSpawn:
-                    if (event.key == pygame.K_d) | (event.key == pygame.K_RIGHT):  # Вправо
+                if ind.objectSpawn or ind.animalSpawn or ind.plantSpawn:
+                    if (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):  # Вправо
                         if self.curs.canMoveRight():
                             self.curs.MoveRight()
-                    if (event.key == pygame.K_a) | (event.key == pygame.K_LEFT):  # влево
+                    if (event.key == pygame.K_a) or (event.key == pygame.K_LEFT):  # влево
                         if self.curs.canMoveLeft():
                             self.curs.MoveLeft()
-                    if (event.key == pygame.K_w) | (event.key == pygame.K_UP):  # Вверх
+                    if (event.key == pygame.K_w) or (event.key == pygame.K_UP):  # Вверх
                         if self.curs.canMoveUp():
                             self.curs.MoveUp()
-                    if (event.key == pygame.K_s) | (event.key == pygame.K_DOWN):  # Вниз
+                    if (event.key == pygame.K_s) or (event.key == pygame.K_DOWN):  # Вниз
                         if self.curs.canMoveDown():
                             self.curs.MoveDown()
                     # Выбираем цвет животного
@@ -388,13 +388,13 @@ class Game:
                             ind.chosenColor = animalColor[ind.chosenColorInd]
                             break
 
-                    if (event.key == pygame.K_h) & (ind.animalSpawn | ind.plantSpawn):  # Вид экосистемы
+                    if (event.key == pygame.K_h) and (ind.animalSpawn or ind.plantSpawn):  # Вид экосистемы
                         if ind.et == 0:
                             ind.et = 1
                         else:
                             ind.et = 0
-                    if (event.key == pygame.K_e) | (event.key == pygame.K_KP_ENTER) \
-                            | (event.key == pygame.K_SPACE):  # Подтвердить
+                    if (event.key == pygame.K_e) or (event.key == pygame.K_KP_ENTER) \
+                            or (event.key == pygame.K_SPACE):  # Подтвердить
                         xcur = self.curs.tileTo[0]
                         ycur = self.curs.tileTo[1]
                         flagO = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].object
@@ -403,25 +403,25 @@ class Game:
                         flagU = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].user
                         flagT = tileTypes[maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].type]["floor"]
                         if ind.objectSpawn:
-                            if (flagA is None) & (flagP is None) & (flagU is None):
+                            if (flagA is None) and (flagP is None) and (flagU is None):
                                 if flagO is None:
                                     self.eco.addObject(self, xcur, ycur, 0)
                                 else:
                                     flagO.deleteAtMap(xcur, ycur, ind.mapNo)
                                     self.eco.delObject(flagO.index)
                         if ind.animalSpawn:
-                            if (flagO is None) & (flagP is None) & (flagU is None) & (flagT != floorTypes["solid"]):
-                                if ((flagT != floorTypes["water"]) & (et_type[ind.et] == ecoType["Land"])) | (
-                                        (flagT != floorTypes["path"]) & (et_type[ind.et] == ecoType["Water"])):
+                            if (flagO is None) and (flagP is None) and (flagU is None) and (flagT != floorTypes["solid"]):
+                                if ((flagT != floorTypes["water"]) and (et_type[ind.et] == ecoType["Land"])) or (
+                                        (flagT != floorTypes["path"]) and (et_type[ind.et] == ecoType["Water"])):
                                     if flagA is None:
                                         self.eco.addAnim(self, xcur, ycur, ind.chosenColor, et_type[ind.et])
                                     else:
                                         flagA.deleteAtMap(xcur, ycur, ind.mapNo)
                                         self.eco.delAnim(flagA.index)
                         if ind.plantSpawn:
-                            if (flagO is None) & (flagU is None) & (flagA is None):
-                                if ((flagT == floorTypes["path"]) & (et_type[ind.et] == ecoType["Land"])) | (
-                                        (flagT == floorTypes["water"]) & (et_type[ind.et] == ecoType["Water"])):
+                            if (flagO is None) and (flagU is None) and (flagA is None):
+                                if ((flagT == floorTypes["path"]) and (et_type[ind.et] == ecoType["Land"])) or (
+                                        (flagT == floorTypes["water"]) and (et_type[ind.et] == ecoType["Water"])):
                                     if flagP is None:
                                         self.eco.addPlant(self, xcur, ycur, et_type[ind.et])
                                     else:
@@ -451,12 +451,12 @@ class Game:
                         ind.mapCh = 8
                     if event.key == pygame.K_9:
                         ind.mapCh = 9
-                    if (event.key == pygame.K_d) | (event.key == pygame.K_RIGHT):
+                    if (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):
                         if ind.mapCh < 9:
                             ind.mapCh += 1
                         else:
                             ind.mapCh = 0
-                    if (event.key == pygame.K_a) | (event.key == pygame.K_LEFT):
+                    if (event.key == pygame.K_a) or (event.key == pygame.K_LEFT):
                         if ind.mapCh > 0:
                             ind.mapCh -= 1
                         else:
@@ -474,7 +474,7 @@ class Game:
                         self.update_map()
 
                 # Работа со временем
-                if (event.key == pygame.K_t) & (ind.currentSpeed != 0):
+                if (event.key == pygame.K_t) and (ind.currentSpeed != 0):
                     if ind.currentSpeed < 9:
                         ind.currentSpeed += 1
                     else:
@@ -521,35 +521,35 @@ class Game:
         ind.tPlantW += 1
         if ind.PLT == 2:
             point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-            if (point[0] != 0) & (point[1] != 0):
+            if (point[0] != 0) and (point[1] != 0):
                 self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
         else:
             if ind.PLT > 2:
                 for m in range(2, ind.PLT + 1):
                     point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-                    if (point[0] != 0) & (point[1] != 0):
+                    if (point[0] != 0) and (point[1] != 0):
                         self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
             else:
                 if ind.tPlantL > (2 - ind.PLT):
                     ind.tPlantL = 0
                     point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-                    if (point[0] != 0) & (point[1] != 0):
+                    if (point[0] != 0) and (point[1] != 0):
                         self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
         if ind.PLW == 2:
             point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-            if (point[0] != 0) & (point[1] != 0):
+            if (point[0] != 0) and (point[1] != 0):
                 self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
         else:
             if ind.PLW > 2:
                 for m in range(2, ind.PLW + 1):
                     point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-                    if (point[0] != 0) & (point[1] != 0):
+                    if (point[0] != 0) and (point[1] != 0):
                         self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
             else:
                 if ind.tPlantW > (2 - ind.PLW):
                     ind.tPlantW = 0
                     point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-                    if (point[0] != 0) & (point[1] != 0):
+                    if (point[0] != 0) and (point[1] != 0):
                         self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
         # Обновление состояния растений
         listdelLater = []
@@ -591,7 +591,7 @@ class Game:
             #         self.eco.delAnim(self.eco.animals[h].index)
             #         continue
             #     stat = self.eco.animals[h].status
-            #     if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
+            #     if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
             #         self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
             #         self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
             #         stat = self.eco.choosePurpose(self, h)
@@ -633,7 +633,7 @@ class Game:
             keylisth = hlist.copy().keys()
             for h in keylisth:
                 stat = self.eco.animals[h].status
-                if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
+                if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
                     stat = self.eco.choosePurpose(self, h)
@@ -663,7 +663,7 @@ class Game:
             # for h in self.eco.animals:
             #     # console.log("tak: " + tak + ", Anim number: " + self.eco.animals.length)
             #     stat = self.eco.animals[h].status
-            #     if (stat != statusAnim["ZERO"]) & (stat != statusAnim["DEATH"]):
+            #     if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
             #         self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
             #         self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
             #         stat = self.eco.choosePurpose(self, h)
@@ -730,9 +730,9 @@ class Game:
         self.spriteupdate()
         for row, tiles in enumerate(currentmap):
             for col, tile in enumerate(tiles):
-                if (tile == 1) | (tile == 3) | (tile == 5) | (tile == 7):
+                if (tile == 1) or (tile == 3) or (tile == 5) or (tile == 7):
                     Wall(self, col, row, tile)
-                if (tile == 0) | (tile == 2) | (tile == 4) | (tile == 6):
+                if (tile == 0) or (tile == 2) or (tile == 4) or (tile == 6):
                     GroundTyle(self, col, row, tile)
         # self.curs.update()
 

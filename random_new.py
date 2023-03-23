@@ -23,9 +23,9 @@ def RandomPoint(mN, ect, eco):
         i1 += 1
         flagC = pov.statReturn(a1, ect, eco)
         flagT = tileTypes[mapTileData[ind.mapNo].map[toIndex(x, y)].type]["floor"]
-        tr1 = (flagT == ind.floorTypes["path"]) & (ect == ind.ecoType["Land"])
-        tr2 = (flagT == ind.floorTypes["water"]) & (ect == ind.ecoType["Water"])
-        fl = ((not ((flagC == statusCell["CLEAR"]) & (tr1 | tr2))) & (i1 < currnum))
+        tr1 = (flagT == ind.floorTypes["path"]) and (ect == ind.ecoType["Land"])
+        tr2 = (flagT == ind.floorTypes["water"]) and (ect == ind.ecoType["Water"])
+        fl = ((not ((flagC == statusCell["CLEAR"]) and (tr1 or tr2))) and (i1 < currnum))
     if i1 < currnum:
         return a1
     return [0, 0]

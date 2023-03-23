@@ -32,10 +32,10 @@ def statReturn(a, b, eco):
     o3 = mapTileData[ind.mapNo].map[toIndex(a[0], a[1])].animal
     o4 = mapTileData[ind.mapNo].map[toIndex(a[0], a[1])].user
     flag_t = tileTypes[mapTileData[ind.mapNo].map[toIndex(a[0], a[1])].type]["floor"]
-    if (o1 is not None) | (o4 is not None) | (flag_t == floorTypes["solid"]):
+    if (o1 is not None) or (o4 is not None) or (flag_t == floorTypes["solid"]):
         return statusCell["ROCK"]
-    if ((flag_t == floorTypes["water"]) & (b == ecoType["Land"])) \
-            | ((flag_t == floorTypes["path"]) & (b == ecoType["Water"])):
+    if ((flag_t == floorTypes["water"]) and (b == ecoType["Land"])) \
+            or ((flag_t == floorTypes["path"]) and (b == ecoType["Water"])):
         return statusCell["ROCK"]
     if o2 is not None:
         inds = o2.index
@@ -67,7 +67,7 @@ class PointOfView:
         for iii in range(4):
             t = trans[iii]
             p = [t[0] + a[0], t[1] + a[1]]
-            if (p[0] < 0) | (p[1] < 0) | (p[0] > (mapW[ind.mapNo] - 1)) | (p[1] > (mapH[ind.mapNo] - 1)):
+            if (p[0] < 0) or (p[1] < 0) or (p[0] > (mapW[ind.mapNo] - 1)) or (p[1] > (mapH[ind.mapNo] - 1)):
                 self.lookTile[t[0] + 2][t[1] + 2] = statusCell["ROCK"]
                 continue
             st1 = statReturn(p, b, eco)
@@ -75,7 +75,7 @@ class PointOfView:
         for iii in range(4, 8):
             t = trans[iii]
             p = [t[0] + a[0], t[1] + a[1]]
-            if (p[0] < 0) | (p[1] < 0) | (p[0] > (mapW[ind.mapNo] - 1)) | (p[1] > (mapH[ind.mapNo] - 1)):
+            if (p[0] < 0) or (p[1] < 0) or (p[0] > (mapW[ind.mapNo] - 1)) or (p[1] > (mapH[ind.mapNo] - 1)):
                 self.lookTile[t[0] + 2][t[1] + 2] = statusCell["ROCK"]
                 continue
             st1 = statReturn(p, b, eco)
@@ -86,7 +86,7 @@ class PointOfView:
         for iii in range(8, 12):
             t = trans[iii]
             p = [t[0] + a[0], t[1] + a[1]]
-            if (p[0] < 0) | (p[1] < 0) | (p[0] > (mapW[ind.mapNo] - 1)) | (p[1] > (mapH[ind.mapNo] - 1)):
+            if (p[0] < 0) or (p[1] < 0) or (p[0] > (mapW[ind.mapNo] - 1)) or (p[1] > (mapH[ind.mapNo] - 1)):
                 self.lookTile[t[0] + 2][t[1] + 2] = statusCell["ROCK"]
                 continue
             st1 = statReturn(p, b, eco)
@@ -104,7 +104,7 @@ class PointOfView:
         for iii in range(12, 20):
             t = trans[iii]
             p = [t[0] + a[0], t[1] + a[1]]
-            if (p[0] < 0) | (p[1] < 0) | (p[0] > (mapW[ind.mapNo] - 1)) | (p[1] > (mapH[ind.mapNo] - 1)):
+            if (p[0] < 0) or (p[1] < 0) or (p[0] > (mapW[ind.mapNo] - 1)) or (p[1] > (mapH[ind.mapNo] - 1)):
                 self.lookTile[t[0] + 2][t[1] + 2] = statusCell["ROCK"]
                 continue
             st1 = statReturn(p, b, eco)
@@ -123,7 +123,7 @@ class PointOfView:
         for iii in range(20, 24):
             t = trans[iii]
             p = [t[0] + a[0], t[1] + a[1]]
-            if (p[0] < 0) | (p[1] < 0) | (p[0] > (mapW[ind.mapNo] - 1)) | (p[1] > (mapH[ind.mapNo] - 1)):
+            if (p[0] < 0) or (p[1] < 0) or (p[0] > (mapW[ind.mapNo] - 1)) or (p[1] > (mapH[ind.mapNo] - 1)):
                 self.lookTile[t[0] + 2][t[1] + 2] = statusCell["ROCK"]
                 continue
             st1 = statReturn(p, b, eco)

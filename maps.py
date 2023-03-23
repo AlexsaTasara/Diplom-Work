@@ -25,7 +25,7 @@ class TileMap:
         self.h = h
         dd = len(d)
         ddd = len(d[0])
-        if (dd != h) | (ddd != w):
+        if (dd != h) or (ddd != w):
             return False
         self.map = []
         for y in range(h):

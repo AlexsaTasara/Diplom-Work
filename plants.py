@@ -72,7 +72,7 @@ class Plant(pygame.sprite.Sprite):
 
     def eat(self):
         self.food -= self.piece
-        if (self.food <= 0) & (self.liveTime < self.told):
+        if (self.food <= 0) and (self.liveTime < self.told):
             self.liveTime = self.told
         return self.food
 
@@ -84,14 +84,14 @@ class Plant(pygame.sprite.Sprite):
         if self.liveTime < self.berryTime:
             self.status = plantStatus["sprout"]
         else:
-            if (self.liveTime < self.told) & (self.food > 0):
+            if (self.liveTime < self.told) and (self.food > 0):
                 self.status = plantStatus["berry"]
             else:
-                if (self.food <= 0) | (self.liveTime < self.deathTime):
+                if (self.food <= 0) or (self.liveTime < self.deathTime):
                     self.status = plantStatus["wither"]
 
     def eq(self, x, y):
-        return (self.X == x) & (self.Y == y)
+        return (self.X == x) and (self.Y == y)
 
     def pos(self):
         return self.X, self.Y

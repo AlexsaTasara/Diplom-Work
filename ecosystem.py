@@ -201,7 +201,7 @@ class Ecosystem(pygame.sprite.Sprite):
             aa1 = anim.enemy(self.animals[indexA])
             aa2 = self.animals[indexA].status != statusAnim["DEATH"]
             aa3 = self.animals[indexA].status != statusAnim["ZERO"]
-            if aa1 & aa2 & aa3:
+            if aa1 and aa2 and aa3:
                 iii = indexA
                 return iii
         return iii
@@ -214,7 +214,7 @@ class Ecosystem(pygame.sprite.Sprite):
             aa1 = anim.enemy(self.animals[indexA])
             aa2 = self.animals[indexA].status != statusAnim["DEATH"]
             aa3 = self.animals[indexA].status != statusAnim["ZERO"]
-            if aa1 & aa2 & aa3:
+            if aa1 and aa2 and aa3:
                 iii = indexA
                 return iii
         return iii
@@ -236,7 +236,7 @@ class Ecosystem(pygame.sprite.Sprite):
             aa2 = anim1.status != statusAnim["DEATH"]
             aa3 = anim1.status != statusAnim["ZERO"]
             aa4 = anim1.liveTime > anim1.tYang
-            if aa1 & aa2 & aa3 & aa4:
+            if aa1 and aa2 and aa3 and aa4:
                 iii = indexA
                 return iii
         return iii
@@ -272,16 +272,16 @@ class Ecosystem(pygame.sprite.Sprite):
                 ny = math.floor(dy / abs(dy))
             aa1 = (game.view.lookTile[pos2[0]][pos2[1] - ny] == statusCell["CLEAR"])
             aa2 = (game.view.lookTile[pos2[0] - nx][pos2[1]] == statusCell["CLEAR"])
-            if (dx != 0) & (dy != 0) & aa1 & aa2:
+            if (dx != 0) and (dy != 0) and aa1 and aa2:
                 if (myCourse % 2) != 0:
                     pos3 = [pos2[0], pos2[1] - ny]
                 else:
                     pos3 = [pos2[0] - nx, pos2[1]]
             else:
-                if (dx != 0) & (game.view.lookTile[pos2[0] - nx][pos2[1]] == statusCell["CLEAR"]):
+                if (dx != 0) and (game.view.lookTile[pos2[0] - nx][pos2[1]] == statusCell["CLEAR"]):
                     pos3 = [pos2[0] - nx, pos2[1]]
                 else:
-                    if (dy != 0) & (game.view.lookTile[pos2[0]][pos2[1] - ny] == statusCell["CLEAR"]):
+                    if (dy != 0) and (game.view.lookTile[pos2[0]][pos2[1] - ny] == statusCell["CLEAR"]):
                         pos3 = [pos2[0], pos2[1] - ny]
                     else:
                         return False
@@ -342,7 +342,7 @@ class Ecosystem(pygame.sprite.Sprite):
                     q = 0
                     for numb in range(len(game.view.nearFood)):
                         r = game.view.nearFood[numb]
-                        if (r[0] == game.view.nearFood[0][0]) & (r[1] == game.view.nearFood[0][1]):
+                        if (r[0] == game.view.nearFood[0][0]) and (r[1] == game.view.nearFood[0][1]):
                             break
                         q += 1
                     indexP = self.indPlant(game.view.nearFood[q])
@@ -359,7 +359,7 @@ class Ecosystem(pygame.sprite.Sprite):
                     return statusAnim["EAT"]
 
         j = self.attack(game, self.animals[iii])  # WALK->ATTACK
-        if self.animals[iii].attackEnergy() & (j >= 0):
+        if self.animals[iii].attackEnergy() and (j >= 0):
             indexA = j
             poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
             poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
@@ -367,14 +367,14 @@ class Ecosystem(pygame.sprite.Sprite):
             shadAnim = AnimalObject(self.animals[iii].index)
             posTo = self.animals[iii].tileTo
             posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) | (posTo[1] != posFrom[1]):
+            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
                 shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             self.animals[iii].tilePurpose = self.animals[iii].tileTo
             return statusAnim["WALK"]
 
         j = self.spawn(game, self.animals[iii])  # SPAWN and WALK->SPAWN
-        if self.animals[iii].spawnEnergy() & (j >= 0):
+        if self.animals[iii].spawnEnergy() and (j >= 0):
             indexA = j
             # indexA = self.lookAnim(game.view.nearAnim[j])
             delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
@@ -420,7 +420,7 @@ class Ecosystem(pygame.sprite.Sprite):
             shadAnim = AnimalObject(self.animals[iii].index)
             posTo = self.animals[iii].tileTo
             posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) | (posTo[1] != posFrom[1]):
+            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
                 shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             self.animals[iii].tilePurpose = self.animals[iii].tileTo
@@ -437,7 +437,7 @@ class Ecosystem(pygame.sprite.Sprite):
                 indexA = j
                 db = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
                     + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
-            if (df < 100) | (db < 100):
+            if (df < 100) or (db < 100):
                 if df < db:
                     poX = game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]
                     poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
@@ -450,12 +450,12 @@ class Ecosystem(pygame.sprite.Sprite):
                 shadAnim = AnimalObject(self.animals[iii].index)
                 posTo = self.animals[iii].tileTo
                 posFrom = self.animals[iii].tileFrom
-                if (posTo[0] != posFrom[0]) | (posTo[1] != posFrom[1]):
+                if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
                     shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                     shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
                 self.animals[iii].tilePurpose = self.animals[iii].tileTo
                 return statusAnim["WALK"]
-        if self.animals[iii].fewEnergy() | (len(game.view.nearClear) == 0):  # SLEEP
+        if self.animals[iii].fewEnergy() or (len(game.view.nearClear) == 0):  # SLEEP
             self.animals[iii].tileTo = self.animals[iii].tileFrom
             self.animals[iii].courseNext = self.animals[iii].courseLast
             return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
@@ -465,11 +465,11 @@ class Ecosystem(pygame.sprite.Sprite):
         flag = self.lookWay(game, iii, [poX, poY])  # WALK
         flag2 = pov.statReturn([self.animals[iii].tilePurpose[0], self.animals[iii].tilePurpose[1]],
                                self.animals[iii].ecoT, self)
-        if flag & (flag2 == statusCell["CLEAR"]):
+        if flag and (flag2 == statusCell["CLEAR"]):
             shadAnim = AnimalObject(self.animals[iii].index)
             posTo = self.animals[iii].tileTo
             posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) | (posTo[1] != posFrom[1]):
+            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
                 shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             return statusAnim["WALK"]
@@ -485,7 +485,7 @@ class Ecosystem(pygame.sprite.Sprite):
             shadAnim = AnimalObject(self.animals[iii].index)
             posTo = self.animals[iii].tileTo
             posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) | (posTo[1] != posFrom[1]):
+            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
                 shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             return statusAnim["WALK"]

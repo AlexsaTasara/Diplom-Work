@@ -221,10 +221,10 @@ class Animal(pygame.sprite.Sprite):
     # Обновляем параметры времени животного (Проблем нет)
     def timeUpdate(self):
         self.liveTime += 1
-        if (self.status == statusAnim["SLEEP"]) | (self.status == statusAnim["EAT"]):
+        if (self.status == statusAnim["SLEEP"]) or (self.status == statusAnim["EAT"]):
             self.energy = (self.energy - self.sleepEnergy)
         else:
-            if (self.status == statusAnim["ATTACK"]) | (self.status == statusAnim["WALK"]):
+            if (self.status == statusAnim["ATTACK"]) or (self.status == statusAnim["WALK"]):
                 self.energy = (self.energy - self.moveEnergy)
         if self.energy <= 0:
             self.status = statusAnim["DEATH"]
@@ -251,12 +251,12 @@ class Animal(pygame.sprite.Sprite):
     # Проверка можно ли аткавать
     def attackEnergy(self):
         ae = self.energy / self.maxEnergy
-        return (self.liveTime > self.tYang) & (ae > self.pAttackEnergy)
+        return (self.liveTime > self.tYang) and (ae > self.pAttackEnergy)
 
     # Проверка можно ли произвести потомство
     def spawnEnergy(self):
         se = self.energy / self.maxEnergy
-        return (self.liveTime > self.tYang) & (se > self.pSpawnEnergy)
+        return (self.liveTime > self.tYang) and (se > self.pSpawnEnergy)
 
 
 class AnimalObject:
