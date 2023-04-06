@@ -161,16 +161,6 @@ class Ecosystem(pygame.sprite.Sprite):
             inds = self.plants[flag_p.index].index
         return inds
 
-    # Функция нахождения индекса животного в массиве по заданному индексу
-    def lookAnim(self, a):
-        inds = self.animals[a].index
-        return inds
-
-    # Функция нахождения индекса растения в массиве по заданному индексу
-    def lookPlant(self, a):
-        inds = self.plants[a].index
-        return inds
-
     # Функция очищения экосистемы от всех объектов
     def clear(self):
         for ann in self.animals:
@@ -196,8 +186,7 @@ class Ecosystem(pygame.sprite.Sprite):
     # Функция возвращения индекса ближайшего врага-животного из списка для защиты
     def attacked(self, game, anim):
         iii = -1
-        for j in game.view.nearAnim:
-            indexA = self.lookAnim(j)
+        for indexA in game.view.nearAnim:
             aa1 = anim.enemy(self.animals[indexA])
             aa2 = self.animals[indexA].status != statusAnim["DEATH"]
             aa3 = self.animals[indexA].status != statusAnim["ZERO"]
@@ -209,8 +198,7 @@ class Ecosystem(pygame.sprite.Sprite):
     # Функция возвращения индекса ближайшего врага-животного из списка для атаки
     def attack(self, game, anim):
         iii = -1
-        for j in game.view.nearAnim:
-            indexA = self.lookAnim(j)
+        for indexA in game.view.nearAnim:
             aa1 = anim.enemy(self.animals[indexA])
             aa2 = self.animals[indexA].status != statusAnim["DEATH"]
             aa3 = self.animals[indexA].status != statusAnim["ZERO"]
@@ -219,18 +207,10 @@ class Ecosystem(pygame.sprite.Sprite):
                 return iii
         return iii
 
-
-
-
-    # -------------------- Ошибка в spawn!
-
-
-
     # Функция возвращения индекса ближайшего не врага-животного с которым можно спариться.
     def spawn(self, game, anim):
         iii = -1
-        for j in game.view.nearAnim:
-            indexA = self.lookAnim(j)
+        for indexA in game.view.nearAnim:
             anim1 = self.animals[indexA]
             aa1 = not (anim.enemy(anim1))
             aa2 = anim1.status != statusAnim["DEATH"]
@@ -244,8 +224,7 @@ class Ecosystem(pygame.sprite.Sprite):
     # Функция возвращения индекса ближайшего мертвого животного из списка
     def eat(self, game):
         iii = -1
-        for j in game.view.nearAnim:
-            indexA = self.lookAnim(j)
+        for indexA in game.view.nearAnim:
             if self.animals[indexA].status == statusAnim["DEATH"]:
                 iii = indexA
                 return iii
