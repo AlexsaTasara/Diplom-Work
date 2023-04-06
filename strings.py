@@ -188,9 +188,26 @@ stplantType = [
     ["Водное", "Aquatic"],
 ]
 stPlS = [
-    ["3 хода = 1 растение", "1 step = 1 plant"],
-    ["2 хода = 1 растение", "1 step = 1 plant"],
+    ["3 хода = 1 растение", "3 step = 1 plant"],
+    ["2 хода = 1 растение", "2 step = 1 plant"],
     ["1 ход = 1 растение", "1 step = 1 plant"],
     ["1 ход = 2 растения", "1 step = 2 plants"],
     ["1 ход = 3 растения", "1 step = 3 plants"]
+]
+
+sideMenuTexts = [
+    ["Поменять карту[m]: ", "Change map[m]: "],
+    ["Добавить животное[i]: ", "Add animal[i]: "],
+    ["Добавить растение[p]: ", "Add plant[p]: "],
+    ["Добавить объект[o]: ", "Add object[o]: "],
+    ["Число животных: ", "Number of animals: "],
+    ["Число растений: ", "Number of plants: "],
+    ["Число объектов: ", "Number of objects: "],
+    ["Число тактов: ", "Number of tact: "],
+    ["Скорость наземных растений[j]: ", "Speed of earth plants[j]: "],
+    ["Скорость морских растений[k]: ", "Speed of water plants[k]: "],
+    ["Скорость модели[t]: ", "Speed of model[t]: "],
+    ["Очистить модель[с]", "Clear model[с]"],
+    ["Запустить модель[z]", "Start model[z]"],
+    ["Сменить язык[l]", "Change language[l]"],
 ]

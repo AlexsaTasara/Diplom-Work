@@ -142,7 +142,6 @@ class PointOfView:
         self.nearClear.clear()
         self.nearAnim.clear()
         for n in range(5):
-            i = 0
             lll = n * 4
             size = 4
             if n == 3:
@@ -169,11 +168,9 @@ class PointOfView:
                     else:
                         if st == statusCell["ANIM"]:
                             p2 = [a[0] + p[0], a[1] + p[1]]
-                            # console.log(eco.animals);
                             c2 = mapTileData[ind.mapNo].map[toIndex(p2[0], p2[1])].animal
                             q = c2.index
                             q2 = eco.animals[q].index
-                            if q < len(eco.animals):
-                                self.nearAnim.append(q2)
+                            self.nearAnim.append(q2)
                 j -= k * (iii+1)
                 k = -k

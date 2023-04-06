@@ -100,12 +100,14 @@ zero_age = 20
 startEnergy = 200
 energy_basic = 200
 maxEnergy = 200
+energy_eat = 50
 moveEnergy = 5
 sleepEnergy = 1
 stepEnergy = 12
 tanimation = 0.0
 pAttackEnergy = 0.8
 pSpawnEnergy = 0.7
+# Поменять для экспериментов
 
 # Информация для растений
 plantStatus = {

@@ -383,14 +383,6 @@ class Ecosystem(pygame.sprite.Sprite):
                 if len(game.view.nearClear) == 0:
                     self.animals[iii].abortion()
                 else:
-                    print(ind.tak)
-                    print("Родитель 1 : ", self.animals[iii].index, ", Энергии: ", self.animals[iii].energy,
-                          ", ", self.animals[iii].maxEnergy, ", Возраст: ", self.animals[iii].liveTime,
-                          ", Позиция: ", self.animals[iii].tileFrom)
-                    print("Родитель 2 : ", self.animals[indexA].index, ", Энергии: ", self.animals[indexA].energy,
-                          ", ", self.animals[indexA].maxEnergy, ", Возраст: ", self.animals[indexA].liveTime,
-                          ", Позиция: ", self.animals[indexA].tileFrom)
-
                     animbaby = Animal(game)
                     animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
                                   game.view.nearClear[0][1])
@@ -403,12 +395,6 @@ class Ecosystem(pygame.sprite.Sprite):
                     shadAnim = AnimalObject(animbaby.index)
                     shadAnim.placeAtMap(animbaby.tileTo[0], animbaby.tileTo[1], ind.mapNo)
                     self.animals[iii].birth(animbaby)
-                    print("Родитель 1 после родов: ", self.animals[iii].index, ", Энергии: ", self.animals[iii].energy,
-                          ", ", self.animals[iii].maxEnergy)
-                    print("Родитель 2 после родов: ", self.animals[indexA].index, ", Энергии: ",
-                          self.animals[indexA].energy,
-                          ", ", self.animals[indexA].maxEnergy)
-                    print()
                 self.animals[iii].tilePurpose = self.animals[iii].tileFrom
                 self.animals[iii].tileTo = self.animals[iii].tileFrom
                 self.animals[iii].courseNext = self.animals[iii].courseLast

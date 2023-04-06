@@ -1,7 +1,5 @@
 import pygame
 import indexes as ind
-from constants import *
-
 
 class SpriteSheet:
     def __init__(self, image):

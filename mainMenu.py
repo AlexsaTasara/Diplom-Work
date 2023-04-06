@@ -1,8 +1,5 @@
 import math
 import os
-import pygame
-import indexes as ind
-from constants import *
 from sideMenu import *
 import maps
 import sys
@@ -11,8 +8,6 @@ import ecosystem as ecoo
 import saveAndLoad as sal
 import pointOfView as pov
 from strings import *
-import mainCharacter as mch
-import objects as obj
 import random_new as rnd
 import time
 import xlsxwriter
@@ -110,7 +105,7 @@ class Game:
         pygame.key.set_repeat(500, 100)
         self.load_data()
 
-    # Функция загрузки сохранненых файлов
+    # Функция загрузки сохраненных файлов
     def load_save_file(self, save1):
         self.eco.clear()
         save1.loadBack()
@@ -183,9 +178,8 @@ class Game:
             "Water": ANIMAL2_IMG
         }
 
-    # Иницилизируем все переменные
+    # Инициализируем все переменные
     def new(self):
-        # initialize all variables and do all the setup for a new game
         self.all_sprites = pygame.sprite.Group()
         self.object_sprites = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
@@ -566,9 +560,7 @@ class Game:
         currentFrameTime = int(time.time() * 1000)
         timeElapsed = currentFrameTime - ind.lastFrameTime
         ind.gameTime += math.floor(timeElapsed * gameSpeeds[ind.currentSpeed]["mult"])
-
         sec = math.floor(int(time.time()))
-
         if sec != ind.currentSecond:
             ind.currentSecond = sec
             ind.framesLastSecond = ind.frameCount
@@ -583,51 +575,10 @@ class Game:
                 self.eco.animals[h].tileFrom = self.eco.animals[h].tileTo
                 self.eco.animals[h].courseLast = self.eco.animals[h].courseNext
             # Обновление списков приоритета/ смерть/ рождение новых особей
-
             hlist = self.eco.animals
             keylisth = hlist.copy().keys()
-            # for h in keylisth:
-            #     if not self.eco.animals[h].timeUpdate():
-            #         self.eco.delAnim(self.eco.animals[h].index)
-            #         continue
-            #     stat = self.eco.animals[h].status
-            #     if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
-            #         self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
-            #         self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
-            #         stat = self.eco.choosePurpose(self, h)
-
             for h in keylisth:
-                # if h == 30:
-                #     print("Существо: ", self.eco.animals[h].index,
-                #           ", Энергия, начальная, макс: ",
-                #           self.eco.animals[h].energy, ", ",
-                #           self.eco.animals[h].startEnergy, ", ",
-                #           self.eco.animals[h].maxEnergy, ", ",
-                #           "Макс возраст и возраст: ",
-                #           self.eco.animals[h].told, " ",
-                #           self.eco.animals[h].liveTime, " ",
-                #           )
                 if not self.eco.animals[h].timeUpdate():
-                    print("Умер: ", self.eco.animals[h].index, )
-                    # print("Умер: ", self.eco.animals[h].index,
-                    #       ", Энергия, начальная, макс: ",
-                    #       self.eco.animals[h].energy, ", ",
-                    #       self.eco.animals[h].startEnergy, ", ",
-                    #       self.eco.animals[h].maxEnergy, ", ",
-                    #       "Шаг, Движение, сон: ",
-                    #       self.eco.animals[h].stepEnergy, ", ",
-                    #       self.eco.animals[h].moveEnergy, ", ",
-                    #       self.eco.animals[h].sleepEnergy, ", ",
-                    #       "Макс возраст и возраст: ",
-                    #       self.eco.animals[h].told, " ",
-                    #       self.eco.animals[h].liveTime, " ",
-                    #       "Возраст смерти и возраст zero: ",
-                    #       self.eco.animals[h].deathTime, " ",
-                    #       self.eco.animals[h].tZero, " ",
-                    #       "Энергия атаки и рождения: ",
-                    #       self.eco.animals[h].pAttackEnergy, " ",
-                    #       self.eco.animals[h].pSpawnEnergy, " ",
-                    #       )
                     self.eco.delAnim(self.eco.animals[h].index)
             hlist = self.eco.animals
             keylisth = hlist.copy().keys()
@@ -643,31 +594,6 @@ class Game:
                     self.worksheetStatus.write(h, self.eCol, self.eco.animals[h].status)
             self.worksheetNumbers.write(0, self.eCol, len(self.eco.animals))
             self.eCol = self.eCol + 1
-
-                # newlisttt = []
-                # for hh in self.eco.animals.keys():
-                #     if hh not in keylisth:
-                #         newlisttt.append(hh)
-                #         flaglist = True
-                # keylisth = newlisttt.copy()
-                # keylisth = newlisttt.copy()
-
-            # listdelLater = []
-            # for h in self.eco.animals:
-            #     if not self.eco.animals[h].timeUpdate():
-            #         listdelLater.append(h)
-            # for h in listdelLater:
-            #     self.eco.delAnim(self.eco.animals[h].index)
-            # # Взять hh элемент словаря
-            # #for hh in range(len(self.eco.animals)):
-            # for h in self.eco.animals:
-            #     # console.log("tak: " + tak + ", Anim number: " + self.eco.animals.length)
-            #     stat = self.eco.animals[h].status
-            #     if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
-            #         self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
-            #         self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
-            #         stat = self.eco.choosePurpose(self, h)
-
             ind.tTime = 0
             ind.tak += 1
         ind.tTime += math.floor(timeElapsed * gameSpeeds[ind.currentSpeed]["mult"])

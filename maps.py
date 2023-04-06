@@ -37,9 +37,11 @@ class TileMap:
 def toIndex(x, y):
     return (y * mapW[ind.mapNo]) + x
 
+
 mapW = {}
 mapH = {}
 gameMap = {}
+
 
 mapW[0] = 16
 mapH[0] = 16

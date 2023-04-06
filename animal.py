@@ -5,6 +5,7 @@ import indexes as ind
 import maps
 from constants import *
 import sprite_sheet as spsh
+import copy
 
 
 def changColor(image, color):
@@ -24,8 +25,8 @@ def sprite_update(image, param):
 class Animal(pygame.sprite.Sprite):
     def __init__(self, game):
         # Уникальные параметры
-        self.index = ind.animalInd
-        self.color = [ind.chosenColor[0], ind.chosenColor[1], ind.chosenColor[2]]
+        self.index = copy.deepcopy(ind.animalInd)
+        self.color = copy.deepcopy([ind.chosenColor[0], ind.chosenColor[1], ind.chosenColor[2]])
         self.status = statusAnim["SLEEP"]
         self.ecoT = ecoType["Land"]
 
@@ -97,20 +98,20 @@ class Animal(pygame.sprite.Sprite):
 
     # Ставим существо в заданную точку
     def placeAt(self, x, y):
-        self.tileFrom = [x, y]
-        self.tileTo = [x, y]
-        self.tilePurpose = [x, y]
-        self.position = [((ind.tileW * x) + ((ind.tileW - self.dimensions[0]) / 2)),
+        self.tileFrom = copy.deepcopy([x, y])
+        self.tileTo = copy.deepcopy([x, y])
+        self.tilePurpose = copy.deepcopy([x, y])
+        self.position = copy.deepcopy([((ind.tileW * x) + ((ind.tileW - self.dimensions[0]) / 2)),
                          ((ind.tileH * y) + ((ind.tileH - self.dimensions[1]) / 2))
-                         ]
+                         ])
 
     def ecoAddType(self, c, game):
-        self.ecoT = c
+        self.ecoT = copy.deepcopy(c)
         self.sprites_list = game.spritelist[self.ecoT]
 
     # Задаем определенный цвет
     def colorAnim(self, col):
-        self.color = col
+        self.color = copy.deepcopy(col)
 
     # Создание нового существа на основе двух родителей
     def Born(self, anim1, anim2, x, y):
@@ -126,7 +127,7 @@ class Animal(pygame.sprite.Sprite):
         # Мутация цвета
         for i in range(3):
             random = (rand.getRandomInt(20) - 10)
-            self.color[i] = math.floor((anim1.color[i] + anim2.color[i]) / 2) + random
+            self.color[i] = copy.deepcopy(math.floor((anim1.color[i] + anim2.color[i]) / 2) + random)
             if self.color[i] > 255:
                 self.color[i] = 255
             if self.color[i] < 0:
@@ -137,11 +138,11 @@ class Animal(pygame.sprite.Sprite):
             random2 = rand.getRandomInt(5) - 2
             if maxRandom < (random1 + random2):
                 maxRandom = random1 + random2
-                self.told = math.floor((anim1.told + anim2.told + 1) / 2) + random1
-                self.startEnergy = math.floor((anim1.startEnergy + anim2.startEnergy + 1) / 2) + random2
+                self.told = copy.deepcopy(math.floor((anim1.told + anim2.told + 1) / 2) + random1)
+                self.startEnergy = copy.deepcopy(math.floor((anim1.startEnergy + anim2.startEnergy + 1) / 2) + random2)
 
-        self.energy = self.startEnergy
-        self.maxEnergy = self.startEnergy
+        self.energy = copy.deepcopy(self.startEnergy)
+        self.maxEnergy = copy.deepcopy(self.startEnergy)
 
         self.stepEnergy = 12
         self.moveEnergy = 5
@@ -165,19 +166,18 @@ class Animal(pygame.sprite.Sprite):
         color_image = changColor(self.image, self.color)
         self.image = color_image
         self.rect = self.image.get_rect()
-        print("Рожден: ", self.index, ", Энергии: ", self.energy, ", ", self.maxEnergy, "Макс возраст: ", self.told)
 
     # Неудачное рождение особи
     def abortion(self):
-        self.energy = self.energy - self.startEnergy
+        self.energy = copy.deepcopy(self.energy - self.startEnergy)
 
     # Затрата энергии на рождение новой особи
     def birth(self, anim):
-        self.energy = self.energy - anim.startEnergy
+        self.energy = copy.deepcopy(self.energy - anim.startEnergy)
 
     # Животное атаковали
     def attacked(self):
-        self.spriteDirect = 8 + self.courseNext
+        self.spriteDirect = copy.deepcopy(8 + self.courseNext)
         self.energy -= self.piece
 
     # От животного откусили кусок
@@ -185,7 +185,7 @@ class Animal(pygame.sprite.Sprite):
         self.food -= self.piece
         if self.food <= 0:
             self.status = statusAnim["ZERO"]
-            self.deathTime = self.tZero
+            self.deathTime = copy.deepcopy(self.tZero)
 
     # Возвращает куда, собирается направляться животное
     def pos(self):
@@ -212,20 +212,21 @@ class Animal(pygame.sprite.Sprite):
 
     # Обновляем статус животного
     def statusUpdate(self, stat):
-        self.status = stat
+        self.status = copy.deepcopy(stat)
         if stat == ind.statusAnim["EAT"]:
-            self.spriteDirect = 4 + self.courseNext
-            self.energy += 50
+            self.spriteDirect = copy.deepcopy(4 + self.courseNext)
+            # Cколько энергии существо получает от поедания еды
+            self.energy += energy_eat
         return stat
 
     # Обновляем параметры времени животного (Проблем нет)
     def timeUpdate(self):
         self.liveTime += 1
         if (self.status == statusAnim["SLEEP"]) or (self.status == statusAnim["EAT"]):
-            self.energy = (self.energy - self.sleepEnergy)
+            self.energy = copy.deepcopy(self.energy - self.sleepEnergy)
         else:
             if (self.status == statusAnim["ATTACK"]) or (self.status == statusAnim["WALK"]):
-                self.energy = (self.energy - self.moveEnergy)
+                self.energy = copy.deepcopy(self.energy - self.moveEnergy)
         if self.energy <= 0:
             self.status = statusAnim["DEATH"]
             self.spriteDirect = animalSprite["dead"]
@@ -234,7 +235,7 @@ class Animal(pygame.sprite.Sprite):
                 return False
             return True
         if self.liveTime <= self.tYang:
-            self.maxEnergy = (self.maxEnergy + self.stepEnergy)
+            self.maxEnergy = copy.deepcopy(self.maxEnergy + self.stepEnergy)
         if self.liveTime > self.told:
             self.moveEnergy += 1
             self.sleepEnergy += 1
@@ -248,7 +249,7 @@ class Animal(pygame.sprite.Sprite):
     def fewEnergy(self):
         return self.energy < 50
 
-    # Проверка можно ли аткавать
+    # Проверка можно ли атаковать
     def attackEnergy(self):
         ae = self.energy / self.maxEnergy
         return (self.liveTime > self.tYang) and (ae > self.pAttackEnergy)
@@ -268,15 +269,15 @@ class AnimalObject:
     def placeAtMap(self, nx, ny, mapN):
         if maps.mapTileData[mapN].map[maps.toIndex(self.x, self.y)].animal == self:
             maps.mapTileData[mapN].map[maps.toIndex(self.x, self.y)].animal = None
-        self.x = nx
-        self.y = ny
-        tmp = ind.mapNo
-        ind.mapNo = mapN
+        self.x = copy.deepcopy(nx)
+        self.y = copy.deepcopy(ny)
+        tmp = copy.deepcopy(ind.mapNo)
+        ind.mapNo = copy.deepcopy(mapN)
         maps.mapTileData[mapN].map[maps.toIndex(nx, ny)].animal = self
         ind.mapNo = tmp
 
     def deleteAtMap(self, nx, ny, mapN):
-        tmp = ind.mapNo
+        tmp = copy.deepcopy(ind.mapNo)
         ind.mapNo = mapN
         maps.mapTileData[mapN].map[maps.toIndex(nx, ny)].animal = None
         ind.mapNo = tmp
