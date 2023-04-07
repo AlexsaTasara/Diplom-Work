@@ -1,6 +1,7 @@
 import math
 import os
 from sideMenu import *
+from animalInfo import *
 import maps
 import sys
 import cursor as curr
@@ -247,9 +248,15 @@ class Game:
         self.background_sprite.draw(self.screen)
         self.all_sprites.draw(self.screen)
         self.object_sprites.draw(self.screen)
+        animsKeys = self.eco.animals.copy().keys()
+        if ind.animInfo in animsKeys and ind.currentSpeed != 0:
+            self.curs.placeAt(self.eco.animals[ind.animInfo].tileTo[0], self.eco.animals[ind.animInfo].tileTo[1])
         if ind.objectSpawn or ind.plantSpawn or ind.animalSpawn or ind.info:
             self.curs_sprites.draw(self.screen)
         type_texts(self, screen, screen_width)
+        if ind.info and ind.animInfo in animsKeys:
+            animal_info_texts(self, screen, screen_width, self.eco.animals[ind.animInfo])
+        #
         # self.type_texts()
         if ind.mapChange:
             self.draw_map_change()
@@ -316,7 +323,7 @@ class Game:
                         ind.objectSpawn = False
                         ind.info = not ind.info
                         if len(self.eco.animals) == 0:
-                            ind.animInfo = False
+                            ind.animInfo = -1
                 # Смена языка
                 if (event.key == pygame.K_l) and (not ind.mapChange):
                     if ind.userLang < lang["ENG"]:
@@ -331,7 +338,7 @@ class Game:
                     ind.objectSpawn = False
                     ind.info = False
                 # Перемещение курсора
-                if ind.objectSpawn or ind.animalSpawn or ind.plantSpawn:
+                if ind.objectSpawn or ind.animalSpawn or ind.plantSpawn or ind.info:
                     if (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):  # Вправо
                         if self.curs.canMoveRight():
                             self.curs.MoveRight()
@@ -421,6 +428,10 @@ class Game:
                                     else:
                                         flagP.deleteAtMap(xcur, ycur, ind.mapNo)
                                         self.eco.delPlant(flagP.index)
+                        if ind.info and flagA is not None:
+                            ind.animInfo = flagA.index
+                        else:
+                            ind.animInfo = -1
                 # Меняем карту
                 if ind.mapChange:
                     if event.key == pygame.K_q:

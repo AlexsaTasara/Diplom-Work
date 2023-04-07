@@ -59,7 +59,7 @@ animalSpawn = False
 plantSpawn = False
 heroVisible = False
 info = False
-animInfo = False
+animInfo = 0
 
 # Нажатия клавиш
 keysDown = {

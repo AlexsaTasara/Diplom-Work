@@ -455,3 +455,7 @@ class Ecosystem(pygame.sprite.Sprite):
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             return statusAnim["WALK"]
         return statusAnim["SLEEP"]
+
+    #chooseEvolutionPurpose
+    #chooseCoevolutionPurpose
+    #chooseSwarmPurpose
