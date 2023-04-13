@@ -2,16 +2,15 @@ import math
 import os
 from sideMenu import *
 from animalInfo import *
-import maps
 import sys
 import cursor as curr
 import ecosystem as ecoo
 import saveAndLoad as sal
 import pointOfView as pov
 from strings import *
-import random_new as rnd
 import time
 import xlsxwriter
+from index_functions import *
 
 # Инициализация игры
 pygame.init()
@@ -288,42 +287,16 @@ class Game:
                         ind.PLT += 1
                 # Добавление / Удаление животных
                 if (event.key == pygame.K_i) and (not ind.mapChange) and (ind.currentSpeed == 0):
-                    if ind.animalSpawn:
-                        ind.animalSpawn = not ind.animalSpawn
-                    else:
-                        ind.animalSpawn = not ind.animalSpawn
-                        ind.plantSpawn = False
-                        ind.objectSpawn = False
-                        ind.info = False
+                    animal_spawn_flag()
                 # Добавление / Удаление растений
                 if (event.key == pygame.K_p) and (not ind.mapChange) and (ind.currentSpeed == 0):
-                    if ind.plantSpawn:
-                        ind.plantSpawn = not ind.plantSpawn
-                    else:
-                        ind.animalSpawn = False
-                        ind.plantSpawn = not ind.plantSpawn
-                        ind.objectSpawn = False
-                        ind.info = False
+                    plant_spawn_flag()
                 # Добавление / Удаление объектов
                 if (event.key == pygame.K_o) and (not ind.mapChange) and (ind.currentSpeed == 0):
-                    if ind.objectSpawn:
-                        ind.objectSpawn = not ind.objectSpawn
-                    else:
-                        ind.animalSpawn = False
-                        ind.plantSpawn = False
-                        ind.objectSpawn = not ind.objectSpawn
-                        ind.info = False
+                    object_spawn_flag()
                 # Информация
                 if (event.key == pygame.K_y) and (not ind.mapChange):
-                    if ind.info:
-                        ind.info = not ind.info
-                    else:
-                        ind.animalSpawn = False
-                        ind.plantSpawn = False
-                        ind.objectSpawn = False
-                        ind.info = not ind.info
-                        if len(self.eco.animals) == 0:
-                            ind.animInfo = -1
+                    info_flag(self)
                 # Смена языка
                 if (event.key == pygame.K_l) and (not ind.mapChange):
                     if ind.userLang < lang["ENG"]:
@@ -332,11 +305,7 @@ class Game:
                         ind.userLang = 0
                 # Смена карты
                 if (event.key == pygame.K_m) and (not ind.mapChange) and (ind.currentSpeed == 0):
-                    ind.mapChange = not ind.mapChange
-                    ind.animalSpawn = False
-                    ind.plantSpawn = False
-                    ind.objectSpawn = False
-                    ind.info = False
+                    map_flag()
                 # Перемещение курсора
                 if ind.objectSpawn or ind.animalSpawn or ind.plantSpawn or ind.info:
                     if (event.key == pygame.K_d) or (event.key == pygame.K_RIGHT):  # Вправо
@@ -394,44 +363,9 @@ class Game:
                             ind.et = 1
                         else:
                             ind.et = 0
-                    if (event.key == pygame.K_e) or (event.key == pygame.K_KP_ENTER) \
-                            or (event.key == pygame.K_SPACE):  # Подтвердить
-                        xcur = self.curs.tileTo[0]
-                        ycur = self.curs.tileTo[1]
-                        flagO = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].object
-                        flagP = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].plant
-                        flagA = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].animal
-                        flagU = maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].user
-                        flagT = tileTypes[maps.mapTileData[ind.mapNo].map[maps.toIndex(xcur, ycur)].type]["floor"]
-                        if ind.objectSpawn:
-                            if (flagA is None) and (flagP is None) and (flagU is None):
-                                if flagO is None:
-                                    self.eco.addObject(self, xcur, ycur, 0)
-                                else:
-                                    flagO.deleteAtMap(xcur, ycur, ind.mapNo)
-                                    self.eco.delObject(flagO.index)
-                        if ind.animalSpawn:
-                            if (flagO is None) and (flagP is None) and (flagU is None) and (flagT != floorTypes["solid"]):
-                                if ((flagT != floorTypes["water"]) and (et_type[ind.et] == ecoType["Land"])) or (
-                                        (flagT != floorTypes["path"]) and (et_type[ind.et] == ecoType["Water"])):
-                                    if flagA is None:
-                                        self.eco.addAnim(self, xcur, ycur, ind.chosenColor, et_type[ind.et])
-                                    else:
-                                        flagA.deleteAtMap(xcur, ycur, ind.mapNo)
-                                        self.eco.delAnim(flagA.index)
-                        if ind.plantSpawn:
-                            if (flagO is None) and (flagU is None) and (flagA is None):
-                                if ((flagT == floorTypes["path"]) and (et_type[ind.et] == ecoType["Land"])) or (
-                                        (flagT == floorTypes["water"]) and (et_type[ind.et] == ecoType["Water"])):
-                                    if flagP is None:
-                                        self.eco.addPlant(self, xcur, ycur, et_type[ind.et])
-                                    else:
-                                        flagP.deleteAtMap(xcur, ycur, ind.mapNo)
-                                        self.eco.delPlant(flagP.index)
-                        if ind.info and flagA is not None:
-                            ind.animInfo = flagA.index
-                        else:
-                            ind.animInfo = -1
+                    # Подтвердить
+                    if (event.key == pygame.K_e) or (event.key == pygame.K_KP_ENTER) or (event.key == pygame.K_SPACE):
+                        confirm_function(self)
                 # Меняем карту
                 if ind.mapChange:
                     if event.key == pygame.K_q:
@@ -484,14 +418,6 @@ class Game:
                         ind.currentSpeed += 1
                     else:
                         ind.currentSpeed = 1
-
-                # # Включить / Выключить музыку
-                # if (e.keyCode == 88):
-                #     if (!audio.paused):
-                #         audio.pause()
-                #     else:
-                #         audio.play()
-
                 # Очистка
                 if event.key == pygame.K_c:
                     self.eco.clear()
@@ -525,37 +451,25 @@ class Game:
         ind.tPlantL += 1
         ind.tPlantW += 1
         if ind.PLT == 2:
-            point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-            if (point[0] != 0) and (point[1] != 0):
-                self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
+            put_plant(self, ecoType["Land"])
         else:
             if ind.PLT > 2:
                 for m in range(2, ind.PLT + 1):
-                    point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-                    if (point[0] != 0) and (point[1] != 0):
-                        self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
+                    put_plant(self, ecoType["Land"])
             else:
                 if ind.tPlantL > (2 - ind.PLT):
                     ind.tPlantL = 0
-                    point = rnd.RandomPoint(ind.mapNo, ecoType["Land"], self.eco)
-                    if (point[0] != 0) and (point[1] != 0):
-                        self.eco.addPlant(self, point[0], point[1], ecoType["Land"])
+                    put_plant(self, ecoType["Land"])
         if ind.PLW == 2:
-            point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-            if (point[0] != 0) and (point[1] != 0):
-                self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
+            put_plant(self, ecoType["Water"])
         else:
             if ind.PLW > 2:
                 for m in range(2, ind.PLW + 1):
-                    point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-                    if (point[0] != 0) and (point[1] != 0):
-                        self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
+                    put_plant(self, ecoType["Water"])
             else:
                 if ind.tPlantW > (2 - ind.PLW):
                     ind.tPlantW = 0
-                    point = rnd.RandomPoint(ind.mapNo, ecoType["Water"], self.eco)
-                    if (point[0] != 0) and (point[1] != 0):
-                        self.eco.addPlant(self, point[0], point[1], ecoType["Water"])
+                    put_plant(self, ecoType["Water"])
         # Обновление состояния растений
         listdelLater = []
         for h in self.eco.plants:
@@ -671,7 +585,6 @@ class Game:
                     Wall(self, col, row, tile)
                 if (tile == 0) or (tile == 2) or (tile == 4) or (tile == 6):
                     GroundTyle(self, col, row, tile)
-        # self.curs.update()
 
 
 # Функция остановки / запуска модели
