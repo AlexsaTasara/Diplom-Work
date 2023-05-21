@@ -60,6 +60,7 @@ class PointOfView:
         # Заполняем их всех значением CLEAR
         self.nearAnim = []
         self.nearFood = []
+        self.nearBody = []
         self.nearClear = []
 
     # Обновление поля видимости
@@ -141,6 +142,7 @@ class PointOfView:
         self.nearFood.clear()
         self.nearClear.clear()
         self.nearAnim.clear()
+        self.nearBody.clear()
         for n in range(5):
             lll = n * 4
             size = 4
@@ -172,5 +174,7 @@ class PointOfView:
                             q = c2.index
                             q2 = eco.animals[q].index
                             self.nearAnim.append(q2)
+                            if eco.animals[q].status == 0:
+                                self.nearBody.append(q2)
                 j -= k * (iii+1)
                 k = -k
