@@ -30,6 +30,7 @@ class Animal(pygame.sprite.Sprite):
         self.status = statusAnim["SLEEP"]
         self.ecoT = ecoType["Land"]
         self.species = 0
+        self.gotDamaged = False
 
         # Веса агента
         self.birthWeight = 0.0

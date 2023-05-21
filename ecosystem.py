@@ -7,12 +7,33 @@ import objects as obj
 import pointOfView as pov
 
 
+def eating(eco):
+    return 1
+
+
+def interacting(eco):
+    return 1
+
+
+def spawning(eco):
+    return 1
+
+
+functionDictionary = {
+    "Eat": eating,
+    "Interact": interacting,
+    "Spawn": spawning
+}
+
 class Ecosystem(pygame.sprite.Sprite):
     def __init__(self):
         self.animals = {}
         self.plants = {}
         self.objects = {}
+        # Массив отношений между видами
         self.relationship = [[1.0] * 8 for i1 in range(8)]
+        # Веса видов для роевого интеллекта
+        self.hiveWeights = [0.3, 0.3, 0.4, 0.5, 0.5]*8
 
     # Создание массива отношений между разными видами
     def createRelationships(self):
@@ -41,6 +62,7 @@ class Ecosystem(pygame.sprite.Sprite):
         anim1.placeAtMap(x, y, ind.mapNo)
         self.animals[anim.index] = anim
 
+    # Нужно исправить.
     def loadAnim(self, game, sanim):
         anim = Animal(game)
         anim.index = sanim.index
@@ -89,6 +111,7 @@ class Ecosystem(pygame.sprite.Sprite):
         plnt1.placeAtMap(x, y, ind.mapNo)
         self.plants[plant.index] = plant
 
+    # Нужно исправить.
     def loadPlant(self, game, splnt):
         plant = Plant(game)
         plant.X = splnt.X
@@ -118,6 +141,7 @@ class Ecosystem(pygame.sprite.Sprite):
         object1.placeAt(x, y, ind.mapNo)
         self.objects[object11.index] = object11
 
+    # Нужно исправить.
     def loadObject(self, game, sobj):
         object11 = obj.ObjectInfo(game, sobj.type)
         object11.x = sobj.x
@@ -553,6 +577,8 @@ class Ecosystem(pygame.sprite.Sprite):
             if result != -1:
                 return result
         # Проходимся по списку функций: Поесть, Размножение, Взаимодействие с другим животным.
+        for i1 in weightList:
+            functionDictionary[i1](self)
         # Если ни одна из трех функций не дала результат, то либо спим, либо ходим по округе.
         if len(game.view.nearClear) == 0:
             result = self.lowEnergySleep(iii)
