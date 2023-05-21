@@ -29,6 +29,20 @@ class Animal(pygame.sprite.Sprite):
         self.color = copy.deepcopy([ind.chosenColor[0], ind.chosenColor[1], ind.chosenColor[2]])
         self.status = statusAnim["SLEEP"]
         self.ecoT = ecoType["Land"]
+        self.species = 0
+
+        # Веса агента
+        self.birthWeight = 0.0
+        self.walkWeight = 0.0
+        self.eatWeight = 0.0
+        self.interactionWeight = 0.0
+        self.attackWeight = 0.0
+        self.runWeight = 0.0
+
+        # Веса пищи
+        self.berryWeight = 0.0
+        self.bodyWeight = 0.0
+        self.fightBodyWeight = 0.0
 
         # Спрайты
         self.groups = game.all_sprites
@@ -60,7 +74,7 @@ class Animal(pygame.sprite.Sprite):
 
         # Еда
         self.piece = 50
-        self.food = 100
+        self.food = 800
 
         # Энергия поведения
         self.pAttackEnergy = pAttackEnergy
@@ -81,12 +95,22 @@ class Animal(pygame.sprite.Sprite):
         self.image = color_image
         self.rect = self.image.get_rect()
 
-    # def sp_upd(self, game):
-    #     self.sprites_list = game.spritelist[self.ecoT]
-    #     self.image = sprite_update(self.sprites_list, self.sprites[self.spriteDirect])
-    #     color_image = changColor(self.image, self.color)
-    #     self.image = color_image
-    #     self.rect = self.image.get_rect()
+    def typeOfSpecies(self):
+        index = 0
+        for i1 in range(3):
+            if self.color[i1] > 127:
+                index += 2 ^ i1
+        self.species = index
+
+    def randomWeights(self):
+        rndw1 = round(rand.random.uniform(0.2, 0.3), 2)
+        rndw2 = round(rand.random.uniform(0.2, 0.3), 2)
+        rndw3 = round(rand.random.uniform(0.2, 0.3), 2)
+        rndw4 = round((1 - rndw1 - rndw2 - rndw3), 2)
+        self.birthWeight = rndw1
+        self.walkWeight = rndw2
+        self.eatWeight = rndw3
+        self.interactionWeight = rndw4
 
     def update(self):
         self.image = sprite_update(self.sprites_list, self.sprites[self.spriteDirect])
@@ -96,14 +120,14 @@ class Animal(pygame.sprite.Sprite):
         self.rect.x = self.tileTo[0] * ind.tileW
         self.rect.y = self.tileTo[1] * ind.tileH
 
-    # Ставим существо в заданную точку
+    # Ставим агента в заданную точку
     def placeAt(self, x, y):
         self.tileFrom = copy.deepcopy([x, y])
         self.tileTo = copy.deepcopy([x, y])
         self.tilePurpose = copy.deepcopy([x, y])
         self.position = copy.deepcopy([((ind.tileW * x) + ((ind.tileW - self.dimensions[0]) / 2)),
-                         ((ind.tileH * y) + ((ind.tileH - self.dimensions[1]) / 2))
-                         ])
+                                       ((ind.tileH * y) + ((ind.tileH - self.dimensions[1]) / 2))
+                                       ])
 
     def ecoAddType(self, c, game):
         self.ecoT = copy.deepcopy(c)
@@ -113,7 +137,7 @@ class Animal(pygame.sprite.Sprite):
     def colorAnim(self, col):
         self.color = copy.deepcopy(col)
 
-    # Создание нового существа на основе двух родителей
+    # Создание нового агента на основе двух родителей
     def Born(self, anim1, anim2, x, y):
         self.tileFrom = [x, y]
         self.tileTo = [x, y]
@@ -141,6 +165,20 @@ class Animal(pygame.sprite.Sprite):
                 self.told = copy.deepcopy(math.floor((anim1.told + anim2.told + 1) / 2) + random1)
                 self.startEnergy = copy.deepcopy(math.floor((anim1.startEnergy + anim2.startEnergy + 1) / 2) + random2)
 
+        # Мутация весов
+        # Веса агента
+        self.birthWeight = round((anim1.birthWeight+anim2.birthWeight)/2, 3)
+        self.walkWeight = round((anim1.walkWeight+anim2.walkWeight)/2, 3)
+        self.eatWeight = round((anim1.eatWeight+anim2.eatWeight)/2, 3)
+        self.interactionWeight = round((anim1.interactionWeight + anim2.interactionWeight) / 2, 3)
+        self.attackWeight = round((anim1.attackWeight+anim2.attackWeight)/2, 3)
+        self.runWeight = round((anim1.runWeight+anim2.runWeight)/2, 3)
+
+        # Веса пищи
+        self.berryWeight = round((anim1.berryWeight+anim2.berryWeight)/2, 3)
+        self.bodyWeight = round((anim1.bodyWeight+anim2.bodyWeight)/2, 3)
+        self.fightBodyWeight = round((anim1.fightBodyWeight+anim2.fightBodyWeight)/2, 3)
+
         self.energy = copy.deepcopy(self.startEnergy)
         self.maxEnergy = copy.deepcopy(self.startEnergy)
 
@@ -167,42 +205,54 @@ class Animal(pygame.sprite.Sprite):
         self.image = color_image
         self.rect = self.image.get_rect()
 
-    # Неудачное рождение особи
+    # Неудачное рождение агента
     def abortion(self):
         self.energy = copy.deepcopy(self.energy - self.startEnergy)
 
-    # Затрата энергии на рождение новой особи
+    # Затрата энергии на рождение нового агента
     def birth(self, anim):
         self.energy = copy.deepcopy(self.energy - anim.startEnergy)
 
-    # Животное атаковали
+    # Агента атаковали. Урон случайный.
     def attacked(self):
         self.spriteDirect = copy.deepcopy(8 + self.courseNext)
-        self.energy -= self.piece
+        randDamage = rand.random.randint(-25, 25)
+        self.energy -= (self.piece + randDamage)
 
-    # От животного откусили кусок
+    # От тела агента откусили кусок
     def eat(self):
         self.food -= self.piece
         if self.food <= 0:
             self.status = statusAnim["ZERO"]
             self.deathTime = copy.deepcopy(self.tZero)
 
-    # Возвращает куда, собирается направляться животное
+    # Возвращает куда, собирается направляться агент
     def pos(self):
         return self.tileTo
 
-    # Проверка является ли это животное врагом
+    # Проверка является ли этот агент врагом
     def enemy(self, anim1):
         q = 0
         for i in range(3):
             q += abs(self.color[i] - anim1.color[i])
         return q >= 355
 
-    # Проверка, что у существа определенный индекс
+    # Проверка можно ли спариваться с существом
+    def canBreed(self, anim1):
+        q = 0
+        for i in range(3):
+            q += abs(self.color[i] - anim1.color[i])
+        return q >= 355
+
+    # Проверка принадлежит ли агент тому же виду
+    def sameSpecies(self, anim1):
+        return self.species == anim1.species
+
+    # Проверка, что у агента определенный индекс
     def eqI(self, i):
         return self.index == i
 
-    # Проверка что выбранная точка равна точки куда направляется существо
+    # Проверка, что выбранная точка равна точки куда направляется агент
     def eq(self, a):
         return a.eq(self.tileTo)
 
@@ -210,7 +260,7 @@ class Animal(pygame.sprite.Sprite):
     def myCourse(self):
         return self.courseLast
 
-    # Обновляем статус животного
+    # Обновляем статус агента
     def statusUpdate(self, stat):
         self.status = copy.deepcopy(stat)
         if stat == ind.statusAnim["EAT"]:
@@ -219,7 +269,7 @@ class Animal(pygame.sprite.Sprite):
             self.energy += energy_eat
         return stat
 
-    # Обновляем параметры времени животного (Проблем нет)
+    # Обновляем параметры времени агента
     def timeUpdate(self):
         self.liveTime += 1
         if (self.status == statusAnim["SLEEP"]) or (self.status == statusAnim["EAT"]):

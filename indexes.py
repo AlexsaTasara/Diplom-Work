@@ -17,6 +17,8 @@ lastFrameTime = 0
 tileW = 32
 tileH = 32
 
+# Тип поведения агентов
+typeOfBehavior = 0
 
 # Язык
 userLang = lang["RUS"]

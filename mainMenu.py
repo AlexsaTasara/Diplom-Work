@@ -26,11 +26,11 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 
 
 # Функция настройки размера клетки.
-def set_tile_size(map_data):
-    biggest_par = len(map_data)
-    line_size = len(map_data[0])
+def set_tile_size(map_data1):
+    biggest_par = len(map_data1)
+    line_size = len(map_data1[0])
     screen_size = screen_height
-    a = ind.tileH*len(map_data) - screen_height
+    a = ind.tileH*len(map_data1) - screen_height
     b = ind.tileW*line_size - screen_width
     if b > a:
         biggest_par = line_size
@@ -103,7 +103,6 @@ class Game:
         pygame.display.set_caption("Модель искусственной жизни")
         self.clock = pygame.time.Clock()
         pygame.key.set_repeat(500, 100)
-        self.load_data()
 
     # Функция загрузки сохраненных файлов
     def load_save_file(self, save1):
@@ -121,17 +120,6 @@ class Game:
             self.eco.loadObject(self, objj)
         for i in self.eco.objects:
             self.eco.objects[i].update()
-
-    def load_data(self):
-        game_folder = os.path.dirname(__file__)
-        img_folder = os.path.join(game_folder, 'sprites')
-        self.map_data = []
-        with open(os.path.join(game_folder, 'map.txt'), 'rt') as f:
-            for line in f:
-                self.map_data.append(line)
-
-        # ind.tileW, ind.tileH = set_tile_size(self.map_data)
-        self.spriteupdate()
 
     def spriteupdate(self):
         GRASS_IMG = pygame.image.load(grass_IMG).convert_alpha()
@@ -198,6 +186,7 @@ class Game:
         self.worksheetNumbers = self.workbook.add_worksheet()
 
         currentmap = maps.gameMap[ind.mapNo]
+        self.eco.createRelationships()
         ind.tileW, ind.tileH = set_tile_size(currentmap)
         self.spriteupdate()
         for row, tiles in enumerate(currentmap):
@@ -206,7 +195,6 @@ class Game:
                     Wall(self, col, row, tile)
                 if (tile == 0) or (tile == 2) or (tile == 4) or (tile == 6):
                     GroundTyle(self, col, row, tile)
-        # self.player.placeAt(2, 2)
         self.curs = curr.Cursor(self)
 
     # Для завершения программы playing = False
@@ -254,9 +242,7 @@ class Game:
             self.curs_sprites.draw(self.screen)
         type_texts(self, screen, screen_width)
         if ind.info and ind.animInfo in animsKeys:
-            animal_info_texts(self, screen, screen_width, self.eco.animals[ind.animInfo])
-        #
-        # self.type_texts()
+            animal_info_texts(screen, screen_width, self.eco.animals[ind.animInfo])
         if ind.mapChange:
             self.draw_map_change()
 

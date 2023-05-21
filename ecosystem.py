@@ -12,6 +12,18 @@ class Ecosystem(pygame.sprite.Sprite):
         self.animals = {}
         self.plants = {}
         self.objects = {}
+        self.relationship = [[1.0] * 8 for i1 in range(8)]
+
+    # Создание массива отношений между разными видами
+    def createRelationships(self):
+        for i1 in range(8):
+            for j1 in range(i1):
+                if i1 == j1:
+                    self.relationship[i1][j1] = 1.0
+                else:
+                    randRel = round(rand.random.uniform(0.4, 0.6), 2)
+                    self.relationship[i1][j1] = copy.deepcopy(randRel)
+                    self.relationship[j1][i1] = copy.deepcopy(randRel)
 
     # Функция добавления животного в экосистему
     def addAnim(self, game, x, y, col, c):
@@ -19,6 +31,8 @@ class Ecosystem(pygame.sprite.Sprite):
         anim.placeAt(x, y)
         anim.colorAnim(col)
         anim.ecoAddType(c, game)
+        anim.randomWeights()
+        anim.typeOfSpecies()
         anim1 = AnimalObject(ind.animalInd)
         if ind.animalInd < 1000000:
             ind.animalInd += 1
@@ -295,135 +309,212 @@ class Ecosystem(pygame.sprite.Sprite):
         self.animals[iii].status = statusAnim["WALK"]
         return True
 
+    def defenceAgainstEnemy(self, game, iii, indexA):
+        delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) + \
+                abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
+        if delta < 2:
+            poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
+            poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
+            if not (self.lookWay(game, iii, [poX, poY])):
+                self.animals[indexA].attacked()
+                self.animals[iii].spriteDirect = 8 + self.animals[iii].courseNext
+                return self.animals[iii].statusUpdate(statusAnim["ATTACK"])
+            if self.animals[iii].courseLast != self.animals[iii].courseNext:
+                return statusAnim["WALK"]
+        return -1
+
+    def eatPlant(self, game, iii):
+        poX = game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]
+        poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
+        if not (self.lookWay(game, iii, [poX, poY])):
+            self.animals[iii].statusUpdate(statusAnim["EAT"])
+            q = 0
+            for numb in range(len(game.view.nearFood)):
+                r = game.view.nearFood[numb]
+                if (r[0] == game.view.nearFood[0][0]) and (r[1] == game.view.nearFood[0][1]):
+                    break
+                q += 1
+            indexP = self.indPlant(game.view.nearFood[q])
+            food = self.plants[indexP].eat()
+            self.animals[iii].eatWeight += 0.002
+            if self.animals[iii].birthWeight > 0.001:
+                self.animals[iii].birthWeight -= 0.001
+            else:
+                self.animals[iii].eatWeight -= 0.001
+            if self.animals[iii].interactionWeight > 0.001:
+                self.animals[iii].interactionWeight -= 0.001
+            else:
+                self.animals[iii].eatWeight -= 0.001
+            return statusAnim["EAT"]
+        return -1
+
+    def eatAgent(self, game, iii, indexA):
+        poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
+        poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
+        if not (self.lookWay(game, iii, [poX, poY])):
+            self.animals[iii].statusUpdate(statusAnim["EAT"])
+            self.animals[indexA].eat()
+            return statusAnim["EAT"]
+        return -1
+
+    def attackTheEnemy(self, game, iii, indexA):
+        poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
+        poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
+        self.lookWay(game, iii, [poX, poY])
+        shadAnim = AnimalObject(self.animals[iii].index)
+        posTo = self.animals[iii].tileTo
+        posFrom = self.animals[iii].tileFrom
+        if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
+            shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
+            shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
+        self.animals[iii].tilePurpose = self.animals[iii].tileTo
+        return statusAnim["WALK"]
+
+    def walkAndSpawn(self, game, iii, indexA):
+        delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
+                + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
+        if delta < 2:
+            if len(game.view.nearClear) == 0:
+                self.animals[iii].abortion()
+            else:
+                animbaby = Animal(game)
+                animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
+                              game.view.nearClear[0][1])
+                self.animals[iii].birthWeight += 0.004
+                if self.animals[iii].eatWeight > 0.002:
+                    self.animals[iii].eatWeight -= 0.002
+                else:
+                    self.animals[iii].birthWeight -= 0.002
+                if self.animals[iii].interactionWeight > 0.002:
+                    self.animals[iii].interactionWeight -= 0.002
+                else:
+                    self.animals[iii].birthWeight -= 0.002
+
+                self.animals[indexA].birthWeight += 0.004
+                if self.animals[indexA].eatWeight > 0.002:
+                    self.animals[indexA].eatWeight -= 0.002
+                else:
+                    self.animals[indexA].birthWeight -= 0.002
+                if self.animals[indexA].interactionWeight > 0.002:
+                    self.animals[indexA].interactionWeight -= 0.002
+                else:
+                    self.animals[indexA].birthWeight -= 0.002
+                animbaby.ecoAddType(self.animals[indexA].ecoT, game)
+                if ind.animalInd < 1000000:
+                    ind.animalInd += 1
+                else:
+                    ind.animalInd = 0
+                animbaby.typeOfSpecies()
+                self.animals[animbaby.index] = animbaby
+                shadAnim = AnimalObject(animbaby.index)
+                shadAnim.placeAtMap(animbaby.tileTo[0], animbaby.tileTo[1], ind.mapNo)
+                self.animals[iii].birth(animbaby)
+            self.animals[iii].tilePurpose = self.animals[iii].tileFrom
+            self.animals[iii].tileTo = self.animals[iii].tileFrom
+            self.animals[iii].courseNext = self.animals[iii].courseLast
+            return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
+        poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
+        poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
+        self.lookWay(game, iii, [poX, poY])
+        # Движение
+        shadAnim = AnimalObject(self.animals[iii].index)
+        posTo = self.animals[iii].tileTo
+        posFrom = self.animals[iii].tileFrom
+        if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
+            shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
+            shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
+        self.animals[iii].tilePurpose = self.animals[iii].tileTo
+        return statusAnim["WALK"]
+
+    def walkToEat(self, game, iii, j):
+        df = 100
+        db = 100
+        if len(game.view.nearFood) != 0:
+            df = abs(game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]) \
+                 + abs(game.view.nearFood[0][1] - self.animals[iii].tileFrom[1])
+        if j >= 0:
+            indexA = j
+            db = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
+                 + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
+        if (df < 100) or (db < 100):
+            if df < db:
+                poX = game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]
+                poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
+                self.lookWay(game, iii, [poX, poY])
+            else:
+                indexA = j
+                poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
+                poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
+                self.lookWay(game, iii, [poX, poY])
+            shadAnim = AnimalObject(self.animals[iii].index)
+            posTo = self.animals[iii].tileTo
+            posFrom = self.animals[iii].tileFrom
+            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
+                shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
+                shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
+            self.animals[iii].tilePurpose = self.animals[iii].tileTo
+            return statusAnim["WALK"]
+        return -1
+
+    def lowEnergySleep(self, iii):
+        self.animals[iii].tileTo = self.animals[iii].tileFrom
+        self.animals[iii].courseNext = self.animals[iii].courseLast
+        return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
+
+    def randomWalk(self, game, iii):
+        q = 0
+        if len(game.view.nearClear) > 1:
+            q = rnd.getRandomInt(len(game.view.nearClear) - 1)  # WALK
+        poX = game.view.nearClear[q][0] - self.animals[iii].tileFrom[0]
+        poY = game.view.nearClear[q][1] - self.animals[iii].tileFrom[1]
+        self.lookWay(game, iii, [poX, poY])
+        self.animals[iii].tilePurpose = game.view.nearClear[q]
+        shadAnim = AnimalObject(self.animals[iii].index)
+        posTo = self.animals[iii].tileTo
+        posFrom = self.animals[iii].tileFrom
+        if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
+            shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
+            shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
+        return statusAnim["WALK"]
+
     # Функция выбора цели для существа
     def choosePurpose(self, game, iii):  # i - индекс существа в массиве
         j = self.attacked(game, self.animals[iii])  # DEFENSE and ATTACK
         if j >= 0:
-            indexA = j
-            delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) + \
-                abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
-            if delta < 2:
-                poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
-                poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
-                if not (self.lookWay(game, iii, [poX, poY])):
-                    self.animals[indexA].attacked()
-                    self.animals[iii].spriteDirect = 8 + self.animals[iii].courseNext
-                    return self.animals[iii].statusUpdate(statusAnim["ATTACK"])
-                if self.animals[iii].courseLast != self.animals[iii].courseNext:
-                    return statusAnim["WALK"]
+            result = self.defenceAgainstEnemy(game, iii, j)
+            if result != -1:
+                return result
 
         if self.animals[iii].hungry():  # EAT
             if len(game.view.nearFood) != 0:
-                poX = game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]
-                poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
-                if not (self.lookWay(game, iii, [poX, poY])):
-                    self.animals[iii].statusUpdate(statusAnim["EAT"])
-                    q = 0
-                    for numb in range(len(game.view.nearFood)):
-                        r = game.view.nearFood[numb]
-                        if (r[0] == game.view.nearFood[0][0]) and (r[1] == game.view.nearFood[0][1]):
-                            break
-                        q += 1
-                    indexP = self.indPlant(game.view.nearFood[q])
-                    food = self.plants[indexP].eat()
-                    return statusAnim["EAT"]
+                result = self.eatPlant(game, iii)
+                if result != -1:
+                    return result
             j = self.eat(game)
             if j >= 0:
-                indexA = j
-                poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
-                poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
-                if not (self.lookWay(game, iii, [poX, poY])):
-                    self.animals[iii].statusUpdate(statusAnim["EAT"])
-                    self.animals[indexA].eat()
-                    return statusAnim["EAT"]
+                result = self.eatAgent(game, iii, j)
+                if result != -1:
+                    return result
 
         j = self.attack(game, self.animals[iii])  # WALK->ATTACK
         if self.animals[iii].attackEnergy() and (j >= 0):
-            indexA = j
-            poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
-            poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
-            self.lookWay(game, iii, [poX, poY])
-            shadAnim = AnimalObject(self.animals[iii].index)
-            posTo = self.animals[iii].tileTo
-            posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
-                shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
-                shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
-            self.animals[iii].tilePurpose = self.animals[iii].tileTo
-            return statusAnim["WALK"]
+            result = self.attackTheEnemy(game, iii, j)
+            return result
 
         j = self.spawn(game, self.animals[iii])  # SPAWN and WALK->SPAWN
         if self.animals[iii].spawnEnergy() and (j >= 0):
-            indexA = j
-            # indexA = self.lookAnim(game.view.nearAnim[j])
-            delta = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
-                + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
-            if delta < 2:
-                if len(game.view.nearClear) == 0:
-                    self.animals[iii].abortion()
-                else:
-                    animbaby = Animal(game)
-                    animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
-                                  game.view.nearClear[0][1])
-                    animbaby.ecoAddType(self.animals[iii].ecoT, game)
-                    if ind.animalInd < 1000000:
-                        ind.animalInd += 1
-                    else:
-                        ind.animalInd = 0
-                    self.animals[animbaby.index] = animbaby
-                    shadAnim = AnimalObject(animbaby.index)
-                    shadAnim.placeAtMap(animbaby.tileTo[0], animbaby.tileTo[1], ind.mapNo)
-                    self.animals[iii].birth(animbaby)
-                self.animals[iii].tilePurpose = self.animals[iii].tileFrom
-                self.animals[iii].tileTo = self.animals[iii].tileFrom
-                self.animals[iii].courseNext = self.animals[iii].courseLast
-                return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
-            poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
-            poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
-            self.lookWay(game, iii, [poX, poY])
-            # Движение
-            shadAnim = AnimalObject(self.animals[iii].index)
-            posTo = self.animals[iii].tileTo
-            posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
-                shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
-                shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
-            self.animals[iii].tilePurpose = self.animals[iii].tileTo
-            return statusAnim["WALK"]
+            result = self.walkAndSpawn(game, iii, j)
+            return result
 
         if self.animals[iii].hungry():  # WALK->EAT
             j = self.eat(game)
-            df = 100
-            db = 100
-            if len(game.view.nearFood) != 0:
-                df = abs(game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]) \
-                     + abs(game.view.nearFood[0][1] - self.animals[iii].tileFrom[1])
-            if j >= 0:
-                indexA = j
-                db = abs(self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]) \
-                    + abs(self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1])
-            if (df < 100) or (db < 100):
-                if df < db:
-                    poX = game.view.nearFood[0][0] - self.animals[iii].tileFrom[0]
-                    poY = game.view.nearFood[0][1] - self.animals[iii].tileFrom[1]
-                    self.lookWay(game, iii, [poX, poY])
-                else:
-                    indexA = j
-                    poX = self.animals[indexA].tileTo[0] - self.animals[iii].tileFrom[0]
-                    poY = self.animals[indexA].tileTo[1] - self.animals[iii].tileFrom[1]
-                    self.lookWay(game, iii, [poX, poY])
-                shadAnim = AnimalObject(self.animals[iii].index)
-                posTo = self.animals[iii].tileTo
-                posFrom = self.animals[iii].tileFrom
-                if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
-                    shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
-                    shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
-                self.animals[iii].tilePurpose = self.animals[iii].tileTo
-                return statusAnim["WALK"]
+            result = self.walkToEat(game, iii, j)
+            if result != -1:
+                return result
+
         if self.animals[iii].fewEnergy() or (len(game.view.nearClear) == 0):  # SLEEP
-            self.animals[iii].tileTo = self.animals[iii].tileFrom
-            self.animals[iii].courseNext = self.animals[iii].courseLast
-            return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
+            result = self.lowEnergySleep(iii)
+            return result
 
         poX = self.animals[iii].tilePurpose[0] - self.animals[iii].tileFrom[0]
         poY = self.animals[iii].tilePurpose[1] - self.animals[iii].tileFrom[1]
@@ -438,24 +529,40 @@ class Ecosystem(pygame.sprite.Sprite):
                 shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
                 shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
             return statusAnim["WALK"]
-        nerlen = len(game.view.nearClear)
         if len(game.view.nearClear) != 0:
-            q = 0
-            if nerlen > 1:
-                q = rnd.getRandomInt(len(game.view.nearClear) - 1)  # WALK
-            poX = game.view.nearClear[q][0] - self.animals[iii].tileFrom[0]
-            poY = game.view.nearClear[q][1] - self.animals[iii].tileFrom[1]
-            self.lookWay(game, iii, [poX, poY])
-            self.animals[iii].tilePurpose = game.view.nearClear[q]
-            shadAnim = AnimalObject(self.animals[iii].index)
-            posTo = self.animals[iii].tileTo
-            posFrom = self.animals[iii].tileFrom
-            if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
-                shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
-                shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
-            return statusAnim["WALK"]
+            result = self.randomWalk(game, iii)
+            return result
         return statusAnim["SLEEP"]
 
-    #chooseEvolutionPurpose
-    #chooseCoevolutionPurpose
-    #chooseSwarmPurpose
+    # Выбор между: бродить или спать.
+    def chooseSleep(self, iii):
+        rand1 = round(rand.random.uniform(0, 1), 2)
+        maxE = self.animals[iii].maxEnergy
+        curE = self.animals[iii].energy
+        chance = curE/(maxE*0.9)
+        if rand1 < chance:
+            return False
+        else:
+            return True
+
+    def chooseCoevolutionPurpose(self, game, iii, weightList):
+        # Если Агента атаковали
+        j = self.attacked(game, self.animals[iii])  # DEFENSE and ATTACK
+        if j >= 0:
+            result = self.defenceAgainstEnemy(game, iii, j)
+            if result != -1:
+                return result
+        # Проходимся по списку функций: Поесть, Размножение, Взаимодействие с другим животным.
+        # Если ни одна из трех функций не дала результат, то либо спим, либо ходим по округе.
+        if len(game.view.nearClear) == 0:
+            result = self.lowEnergySleep(iii)
+            return result
+        else:
+            if self.chooseSleep(iii):
+                result = self.lowEnergySleep(iii)
+                return result
+            else:
+                result = self.randomWalk(game, iii)
+                return result
+
+
