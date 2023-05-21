@@ -11,6 +11,31 @@ def eating(eco):
     return 1
 
 
+def lookBerry(eco, game):
+    index = -1
+    if len(game.view.nearFood) != 0:
+        index = game.view.nearFood[0]
+    return index
+
+
+def lookBody(eco, game):
+    index = -1
+    if len(game.view.nearBody) != 0:
+        index = game.view.nearBody[0]
+    return index
+
+
+def lookAgent(eco, game, anim):
+    index = -1
+    for i1 in range(game.view.nearAnimal):
+        if not (game.eco.animals[i1].sameSpecies(anim)):
+            # Проверка хотим ли мы атаковать
+            check = round(rand.random.uniform(0.0, 1.0), 2)
+            if check > game.eco.relationship[i1, anim.index]:
+                index = i1
+    return index
+
+
 def interacting(eco):
     return 1
 
@@ -24,6 +49,13 @@ functionDictionary = {
     "Interact": interacting,
     "Spawn": spawning
 }
+
+eatingDictionary = {
+    "Berry": lookBerry,
+    "Body": lookBody,
+    "Agent": lookAgent
+}
+
 
 class Ecosystem(pygame.sprite.Sprite):
     def __init__(self):
@@ -360,6 +392,7 @@ class Ecosystem(pygame.sprite.Sprite):
                 q += 1
             indexP = self.indPlant(game.view.nearFood[q])
             food = self.plants[indexP].eat()
+
             self.animals[iii].eatWeight += 0.002
             if self.animals[iii].birthWeight > 0.001:
                 self.animals[iii].birthWeight -= 0.001
