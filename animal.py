@@ -34,7 +34,7 @@ class Animal(pygame.sprite.Sprite):
 
         # Веса агента
         self.birthWeight = 0.0
-        self.walkWeight = 0.0
+        self.walkWeight = 0.0 #Может убрать?
         self.eatWeight = 0.0
         self.interactionWeight = 0.0
         self.attackWeight = 0.0

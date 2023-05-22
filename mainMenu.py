@@ -96,6 +96,7 @@ class Game:
         self.worksheetLiveTime = None
         self.worksheetStatus = None
         self.worksheetNumbers = None
+        self.worksheetTotalEnergy = None
         self.eCol = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -184,6 +185,7 @@ class Game:
         self.worksheetLiveTime = self.workbook.add_worksheet()
         self.worksheetStatus = self.workbook.add_worksheet()
         self.worksheetNumbers = self.workbook.add_worksheet()
+        self.worksheetTotalEnergy = self.workbook.add_worksheet()
 
         currentmap = maps.gameMap[ind.mapNo]
         self.eco.createRelationships()
@@ -499,10 +501,16 @@ class Game:
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
                     stat = self.eco.choosePurpose(self, h)
+                    weightList = self.eco.createWeightListAgent(h)
+                    weightListHive = self.eco.createWeightListEco(self.eco.animals[h].species)
+                    self.eco.updateEnergy()
+                    # Записываем информацию в exel документ
+
                     self.worksheetEnergy.write(h, self.eCol, self.eco.animals[h].energy)
                     self.worksheetMaxEnergy.write(h, self.eCol, self.eco.animals[h].maxEnergy)
                     self.worksheetLiveTime.write(h, self.eCol, self.eco.animals[h].liveTime)
                     self.worksheetStatus.write(h, self.eCol, self.eco.animals[h].status)
+                    self.worksheetTotalEnergy.write(h, self.eCol, self.eco.totalEnergy)
             self.worksheetNumbers.write(0, self.eCol, len(self.eco.animals))
             self.eCol = self.eCol + 1
             ind.tTime = 0
