@@ -18,8 +18,8 @@ def animal_info_texts(screen, screen_width, anim):
     textsss[3] = text_format("Энергия: " + str(anim.energy), font6, 20, white)
     textsss[4] = text_format("Максимальная энергия: " + str(anim.maxEnergy), font6, 20, white)
     textsss[5] = text_format("Цвет: " + str(anim.color), font6, 20, white)
-    textsss[6] = text_format("Веса: " + str(anim.birthWeight) + ", " + str(anim.walkWeight) + ", " + str(anim.eatWeight)
-                             + ", " + str(anim.interactionWeight) + ", " + str(anim.runWeight), font6, 20, white)
+    textsss[6] = text_format("Веса: " + str(anim.birthWeight) + ", " + str(anim.eatWeight)
+                             + ", " + str(anim.interactionWeight) + ", " + str(anim.walkWeight), font6, 20, white)
 
     for i in range(len(textsss)):
         title_rects[i] = textsss[i].get_rect()

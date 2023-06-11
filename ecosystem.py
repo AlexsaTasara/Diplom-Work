@@ -44,7 +44,7 @@ def lookAgent(eco, game, anim):
         if not (game.eco.animals[i1].sameSpecies(anim)):
             # Проверка хотим ли мы атаковать
             check = round(rand.random.uniform(0.0, 1.0), 2)
-            aa1 = check > game.eco.relationship[i1, anim.index]
+            aa1 = check > game.eco.relationship[anim.ecoT][i1][anim.index]
             aa2 = anim.attackEnergy
             if aa1 and aa2:
                 index = i1
@@ -57,33 +57,62 @@ def interacting(eco, game, iii):
         anim1 = eco.animals[indexA]
         anim = eco.animals[iii]
         aa0 = not anim.sameSpecies(anim1)
+        aaT = anim1.ecoT == anim.ecoT
         # Ищем существо не того же вида
         if aa0:
-            # Смотрим на отношение между этими видами
-            relation = eco.relationship[anim.species, anim1.species]
-            randomMood = round(rand.random.uniform(0.0, 1.0), 2)
-            # Если положительное отношение
-            if randomMood <= relation:
-                # Выбираем между: идти спариваться или игнорировать
-                # Достаточно взрослый
-                aa1 = anim1.liveTime > anim1.tYang
-                # Можно ли спариваться
-                aa2 = not (anim.canBreed(anim1))
-                # Не мертво
-                aa3 = (anim1.status != statusAnim["DEATH"]) and (anim1.status != statusAnim["ZERO"])
-                if aa1 and aa2 and aa3:
-                    result = eco.walkAndSpawn(game, anim.index, indexA)
-                    return result
-            # Если отрицательное отношение
-            else:
-                # Выбираем между: идти атаковать, игнорировать или убегать.
-                # Есть возможность атаковать
-                aa1 = anim.attackEnergy()
-                if aa1:
-                    # Атакуем если противник совсем рядом
-                    result = eco.defenceAgainstEnemy(game, iii, indexA)
-                    if result != -1:
+            # Если существо той же экосистемы
+            if aaT:
+                # Смотрим на отношение между этими видами
+                relation = eco.relationship[anim.ecoT][anim.species][anim1.species]
+                randomMood = round(rand.random.uniform(0.0, 1.0), 2)
+                # Если положительное отношение
+                if randomMood <= relation:
+                    # Выбираем между: идти спариваться или игнорировать
+                    # Достаточно взрослый
+                    aa1 = anim1.liveTime > anim1.tYang
+                    # Можно ли спариваться
+                    aa2 = not (anim.canBreed(anim1))
+                    # Не мертво
+                    aa3 = (anim1.status != statusAnim["DEATH"]) and (anim1.status != statusAnim["ZERO"])
+                    if aa1 and aa2 and aa3:
+                        result = eco.walkAndSpawn(game, anim.index, indexA)
                         return result
+                # Если отрицательное отношение
+                else:
+                    # Выбираем между: идти атаковать, игнорировать или убегать.
+                    # Есть возможность атаковать
+                    aa1 = anim.attackEnergy()
+                    # Будет ли существо убегать
+                    aa2 = not eco.chooseEscape(anim.index)
+                    aa3 = anim1.liveTime > anim1.tYang
+                    if aa1 and aa2 and aa3:
+                        # Атакуем если противник совсем рядом в противном случае игнорируем
+                        result = eco.defenceAgainstEnemy(game, iii, indexA)
+                        if result != -1:
+                            return result
+
+
+def findPossiblePartner(game, anim):
+    for indexA in game.view.nearAnim:
+        anim1 = game.eco.animals[indexA]
+        # Если существо того же вида
+        aa0 = anim.sameSpecies(anim1)
+        # Можно ли спариваться
+        aa1 = not (anim.canBreed(anim1))
+        # Не мертво
+        aa2 = (anim1.status != statusAnim["DEATH"]) and (anim1.status != statusAnim["ZERO"])
+        # Стоит ли взаимодействовать положительно
+        key1 = anim.species
+        key2 = anim1.species
+        relation = game.eco.relationship[anim.ecoT][key1][key2]
+        randomMood = round(rand.random.uniform(0.0, 1.0), 2)
+        aa3 = randomMood <= relation
+        # Подходящего возраста
+        aa4 = anim1.liveTime > anim1.tYang
+        aa5 = anim.ecoT == anim1.ecoT
+        if (aa0 or aa1) and aa2 and aa3 and aa4 and aa5:
+            return indexA
+    return -1
 
 
 # Вроде закончили с этим.
@@ -93,27 +122,10 @@ def spawning(eco, game, iii):
     # Если существо не может скрещиваться или нет партнеров, возвращает -1
     check = -1
     if canSpawn:
-        # Проходимся по списку животных
-        for indexA in game.view.nearAnim:
-            anim1 = eco.animals[indexA]
-            # Если существо того же вида
-            aa0 = anim.sameSpecies(anim1)
-            # Можно ли спариваться
-            aa1 = not (anim.canBreed(anim1))
-            # Не мертво
-            aa2 = (anim1.status != statusAnim["DEATH"]) and (anim1.status != statusAnim["ZERO"])
-            # Стоит ли взаимодействовать положительно
-            relation = eco.relationship[anim.species, anim1.species]
-            randomMood = round(rand.random.uniform(0.0, 1.0), 2)
-            aa3 = randomMood <= relation
-            # Подходящего возраста
-            aa4 = anim1.liveTime > anim1.tYang
-            if (aa0 or aa1) and aa2 and aa3 and aa4:
-                check = indexA
-                break
+        check = findPossiblePartner(game, anim)
     if check != -1:
         # Если нашли с кем скрещиваться, идем к нему
-        result = eco.walkAndSpawn(game, anim, check)
+        result = eco.walkAndSpawn(game, iii, check)
         if result != -1:
             return result
 
@@ -137,27 +149,39 @@ class Ecosystem(pygame.sprite.Sprite):
         self.plants = {}
         self.objects = {}
         # Массив отношений между видами
-        self.relationship = [[1.0] * 8 for i1 in range(8)]
+        self.relationship = {"Land": [[1.0] * 8 for i1 in range(8)],
+                             "Water": [[1.0] * 8 for i1 in range(8)]}
         # Веса видов для роевого интеллекта
-        self.hiveWeights = [[0.3, 0.3, 0.4, 0.5, 0.5] for i1 in range(8)]
+        self.hiveWeights = {"Land": [[0.3, 0.3, 0.4, 0.5, 0.5] for i1 in range(8)],
+                            "Water": [[0.3, 0.3, 0.4, 0.5, 0.5] for i1 in range(8)]}
         self.totalEnergy = 0
+        self.spEnergy = {"Land": [0, 0, 0, 0, 0, 0, 0, 0],
+                         "Water": [0, 0, 0, 0, 0, 0, 0, 0]}
 
     # Создание массива отношений между разными видами
     def createRelationships(self):
         for i1 in range(8):
             for j1 in range(i1):
                 if i1 == j1:
-                    self.relationship[i1][j1] = 1.0
+                    self.relationship["Land"][i1][j1] = 1.0
+                    self.relationship["Water"][i1][j1] = 1.0
                 else:
                     randRel = round(rand.random.uniform(0.4, 0.6), 2)
-                    self.relationship[i1][j1] = copy.deepcopy(randRel)
-                    self.relationship[j1][i1] = copy.deepcopy(randRel)
+                    self.relationship["Land"][i1][j1] = copy.deepcopy(randRel)
+                    self.relationship["Land"][j1][i1] = copy.deepcopy(randRel)
+                    randRel = round(rand.random.uniform(0.4, 0.6), 2)
+                    self.relationship["Water"][i1][j1] = copy.deepcopy(randRel)
+                    self.relationship["Water"][j1][i1] = copy.deepcopy(randRel)
 
     # Подсчитываем общую энергию системы экосистемы
     def updateEnergy(self):
         self.totalEnergy = 0
+        self.spEnergy = {"Land": [0, 0, 0, 0, 0, 0, 0, 0],
+                         "Water": [0, 0, 0, 0, 0, 0, 0, 0]}
         for an in self.animals:
-            self.totalEnergy += an.energy
+            anim = self.animals[an]
+            self.totalEnergy += anim.energy
+            self.spEnergy[anim.ecoT][anim.species] += anim.energy
 
     # Функция добавления животного в экосистему
     def addAnim(self, game, x, y, col, c):
@@ -345,6 +369,17 @@ class Ecosystem(pygame.sprite.Sprite):
                + abs(self.animals[agent1].tileTo[1] - self.animals[agent2].tileFrom[1])
         return dist
 
+    def relationshipRebalance(self, ecoT, sp1, sp2, balance):
+        self.relationship[ecoT][sp1][sp2] += balance
+        self.relationship[ecoT][sp2][sp1] += balance
+        a = self.relationship[ecoT][sp1][sp2]
+        if a > 1:
+            self.relationship[ecoT][sp1][sp2] = 1
+            self.relationship[ecoT][sp2][sp1] = 1
+        if a < 0:
+            self.relationship[ecoT][sp1][sp2] = 0
+            self.relationship[ecoT][sp2][sp1] = 0
+
     # Ребаланс весов
     def weightRebalance(self, iii, balance, what):
         if what == "birth":
@@ -395,6 +430,17 @@ class Ecosystem(pygame.sprite.Sprite):
                 return iii
         return iii
 
+    # Функция возвращения индекса взрослого животного не того же вида
+    def notSameAdult(self, game, animInd):
+        for indexA in game.view.nearAnim:
+            anim1 = self.animals[indexA]
+            anim = self.animals[animInd]
+            aa0 = not anim.sameSpecies(anim1)
+            aa1 = anim1.liveTime > anim1.tYang
+            if aa0 and aa1:
+                return indexA
+        return -1
+
     # Функция возвращения индекса ближайшего не врага-животного с которым можно спариться.
     def spawn(self, game, anim):
         iii = -1
@@ -404,7 +450,8 @@ class Ecosystem(pygame.sprite.Sprite):
             aa2 = anim1.status != statusAnim["DEATH"]
             aa3 = anim1.status != statusAnim["ZERO"]
             aa4 = anim1.liveTime > anim1.tYang
-            if aa1 and aa2 and aa3 and aa4:
+            aa5 = anim.ecoT == anim1.ecoT
+            if aa1 and aa2 and aa3 and aa4 and aa5:
                 iii = indexA
                 return iii
         return iii
@@ -493,6 +540,9 @@ class Ecosystem(pygame.sprite.Sprite):
                 self.animals[indexA].attacked()
                 self.animals[iii].spriteDirect = 8 + self.animals[iii].courseNext
                 self.weightRebalance(iii, 0.008, "inter")
+                if self.animals[iii].ecoT == self.animals[indexA].ecoT:
+                    self.relationshipRebalance(self.animals[iii].ecoT, self.animals[iii].species,
+                                               self.animals[indexA].species, -0.02)
                 return self.animals[iii].statusUpdate(statusAnim["ATTACK"])
             if self.animals[iii].courseLast != self.animals[iii].courseNext:
                 return statusAnim["WALK"]
@@ -544,6 +594,8 @@ class Ecosystem(pygame.sprite.Sprite):
         if delta < 2:
             if len(game.view.nearClear) == 0:
                 self.animals[iii].abortion()
+                self.weightRebalance(iii, -0.004, "birth")
+                self.weightRebalance(indexA, -0.004, "birth")
             else:
                 animbaby = Animal(game)
                 animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
@@ -551,7 +603,11 @@ class Ecosystem(pygame.sprite.Sprite):
 
                 self.weightRebalance(iii, 0.004, "birth")
                 self.weightRebalance(indexA, 0.004, "birth")
-
+                if not self.animals[iii].sameSpecies(self.animals[indexA]):
+                    self.weightRebalance(iii, 0.004, "inter")
+                    self.weightRebalance(indexA, 0.004, "inter")
+                    self.relationshipRebalance(self.animals[iii].ecoT, self.animals[iii].species,
+                                               self.animals[indexA].species, 0.1)
                 animbaby.ecoAddType(self.animals[indexA].ecoT, game)
                 if ind.animalInd < 1000000:
                     ind.animalInd += 1
@@ -599,14 +655,11 @@ class Ecosystem(pygame.sprite.Sprite):
         self.animals[iii].courseNext = self.animals[iii].courseLast
         return self.animals[iii].statusUpdate(statusAnim["SLEEP"])
 
-    def randomWalk(self, game, iii):
-        q = 0
-        if len(game.view.nearClear) > 1:
-            q = rnd.getRandomInt(len(game.view.nearClear) - 1)  # WALK
-        poX = game.view.nearClear[q][0] - self.animals[iii].tileFrom[0]
-        poY = game.view.nearClear[q][1] - self.animals[iii].tileFrom[1]
+    def walkToCoordinate(self, game, iii, coord):
+        poX = coord[0] - self.animals[iii].tileFrom[0]
+        poY = coord[1] - self.animals[iii].tileFrom[1]
         self.lookWay(game, iii, [poX, poY])
-        self.animals[iii].tilePurpose = game.view.nearClear[q]
+        self.animals[iii].tilePurpose = coord
         shadAnim = AnimalObject(self.animals[iii].index)
         posTo = self.animals[iii].tileTo
         posFrom = self.animals[iii].tileFrom
@@ -614,6 +667,12 @@ class Ecosystem(pygame.sprite.Sprite):
             shadAnim.placeAtMap(self.animals[iii].tileTo[0], self.animals[iii].tileTo[1], ind.mapNo)
             shadAnim.deleteAtMap(self.animals[iii].tileFrom[0], self.animals[iii].tileFrom[1], ind.mapNo)
         return statusAnim["WALK"]
+
+    def randomWalk(self, game, iii):
+        q = 0
+        if len(game.view.nearClear) > 1:
+            q = rnd.getRandomInt(len(game.view.nearClear) - 1)  # WALK
+        return self.walkToCoordinate(game, iii, game.view.nearClear[q])
 
     # Функция выбора цели для существа
     def choosePurpose(self, game, iii):  # i - индекс существа в массиве
@@ -681,12 +740,37 @@ class Ecosystem(pygame.sprite.Sprite):
             return result
         return statusAnim["SLEEP"]
 
+    # Возвращаем координаты точки чтобы, убежать от существа iii
+    def runAwayRoad(self, game, iii):
+        index = [-1, -1]
+        dist = 0
+        # Ищем свободную точку дальшую от существа от которого убегаем
+        for i1 in game.view.nearClear:
+            df = abs(i1[0] - self.animals[iii].tileFrom[0]) \
+                 + abs(i1[1] - self.animals[iii].tileFrom[1])
+            if df > dist:
+                dist = df
+                index = i1
+        return index
+
     # Выбор между: бродить или спать.
-    def chooseSleep(self, iii):
+    def chooseSleep(self, game, iii):
+        aa0 = len(game.view.nearClear) == 0
         rand1 = round(rand.random.uniform(0, 1), 2)
         maxE = self.animals[iii].maxEnergy
         curE = self.animals[iii].energy
         chance = curE / (maxE * 0.9)
+        if rand1 >= chance or aa0:
+            return True
+        else:
+            return False
+
+    # Выбираем между: продолжать или убегать
+    def chooseEscape(self, iii):
+        rand1 = round(rand.random.uniform(0, 0.5), 2)
+        maxE = self.animals[iii].maxEnergy
+        curE = self.animals[iii].energy
+        chance = curE / maxE
         if rand1 < chance:
             return False
         else:
@@ -702,8 +786,8 @@ class Ecosystem(pygame.sprite.Sprite):
         converted_dict = dict(WeightList_by_goals)
         return converted_dict
 
-    def createWeightListEco(self, iii):
-        list1 = self.hiveWeights[iii]
+    def createWeightListEco(self, iii, ecoT):
+        list1 = self.hiveWeights[ecoT][iii]
         WeightList = {"Eat": list1[0],
                       "Interact": list1[1],
                       "Spawn": list1[2]
@@ -720,20 +804,86 @@ class Ecosystem(pygame.sprite.Sprite):
                 result = self.defenceAgainstEnemy(game, iii, j)
                 if result != -1:
                     return result
-        # Проходимся по списку функций: Поесть, Размножение, Взаимодействие с другим животным.
+        # Проходимся по списку функций: Поесть, Размножение, Взаимодействие с другим агентом другого вида.
         keylist = weightList.keys()
         for i1 in keylist:
-            functionDictionary[i1](self, game, iii)
-        # Прошлись по проверкам ближайших действий. Далее выбираем в какую сторону идти или идти в случайное место или
-        # стоять на месте
-        # Если ни одна из трех функций не дала результат, то либо спим, либо ходим по округе.
-        if len(game.view.nearClear) == 0:
-            result = self.lowEnergySleep(iii)
-            return result
-        else:
-            if self.chooseSleep(iii):
-                result = self.lowEnergySleep(iii)
-                return result
+            res = functionDictionary[i1](self, game, iii)
+        # Если рядом ничего нет, выбираем в какую сторону идти или идти в случайное место или стоять на месте
+        random_choosing = self.RandomChoosingOfTarget(game, iii, weightList)
+        return random_choosing
+
+    # Функция выбора куда идет существо
+    def RandomChoosingOfTarget(self, game, indexA, listOfOptions):
+        # Получаем на вход список весов
+        a1 = listOfOptions["Spawn"]
+        a2 = a1 + listOfOptions["Eat"]
+        a3 = a2 + listOfOptions["Interact"]
+        anim = self.animals[indexA]
+        while True:
+            randValue = round(rand.random.uniform(0.0, 1.0), 2)
+            # Поиск партнера
+            if (randValue <= a1) and anim.spawnEnergy():
+                partner = findPossiblePartner(game, anim)
+                if partner != -1:
+                    result = self.moveToTheAgent(game, indexA, partner)
+                    return result
             else:
-                result = self.randomWalk(game, iii)
-                return result
+                # Поиск пищи
+                if (randValue <= a2) and anim.hungry():
+                    j = self.eat(game)
+                    result = self.walkToEat(game, indexA, j)
+                    if result != -1:
+                        return result
+                else:
+                    # Взаимодействие с другими видами
+                    if randValue <= a3 and (anim.liveTime > anim.tYang):
+                        j = self.notSameAdult(game, indexA)
+                        if j != -1:
+                            # Убегаем или движемся к ним
+                            relation = self.relationship[anim.ecoT][anim.species][self.animals[j].species]
+                            randValueRelation = round(rand.random.uniform(0.0, 1.0), 2)
+                            # Позитивно и можно спариваться
+                            if randValueRelation <= relation and anim.spawnEnergy():
+                                result = self.moveToTheAgent(game, indexA, j)
+                                return result
+                            else:
+                                # Убегаем или движемся к противнику
+                                if self.chooseEscape(indexA):
+                                    if len(game.view.nearClear) != 0:
+                                        run_away = self.runAwayRoad(game, j)
+                                        result = self.walkToCoordinate(game, indexA, run_away)
+                                        return result
+                                    else:
+                                        result = self.lowEnergySleep(indexA)
+                                        return result
+                                else:
+                                    result = self.moveToTheAgent(game, indexA, j)
+                                    return result
+                    else:
+                        # Выбираем между случайным движением или сном
+                        if self.chooseSleep(game, indexA):
+                            result = self.lowEnergySleep(indexA)
+                            return result
+                        else:
+                            poX = self.animals[indexA].tilePurpose[0] - self.animals[indexA].tileFrom[0]
+                            poY = self.animals[indexA].tilePurpose[1] - self.animals[indexA].tileFrom[1]
+                            flag = self.lookWay(game, indexA, [poX, poY])  # WALK
+                            flag2 = pov.statReturn([self.animals[indexA].tilePurpose[0],
+                                                    self.animals[indexA].tilePurpose[1]],
+                                                   self.animals[indexA].ecoT, self)
+                            if flag and (flag2 == statusCell["CLEAR"]):
+                                shadAnim = AnimalObject(self.animals[indexA].index)
+                                posTo = self.animals[indexA].tileTo
+                                posFrom = self.animals[indexA].tileFrom
+                                if (posTo[0] != posFrom[0]) or (posTo[1] != posFrom[1]):
+                                    shadAnim.placeAtMap(self.animals[indexA].tileTo[0],
+                                                        self.animals[indexA].tileTo[1],
+                                                        ind.mapNo)
+                                    shadAnim.deleteAtMap(self.animals[indexA].tileFrom[0],
+                                                         self.animals[indexA].tileFrom[1],
+                                                         ind.mapNo)
+                                return statusAnim["WALK"]
+                            if len(game.view.nearClear) != 0:
+                                result = self.randomWalk(game, indexA)
+                                return result
+                            return statusAnim["SLEEP"]

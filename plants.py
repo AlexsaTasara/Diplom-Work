@@ -18,7 +18,7 @@ class Plant(pygame.sprite.Sprite):
         self.index = ind.plantInd
         self.ecoT = ecoType["Land"]
         self.liveTime = 0
-        self.deathTime = 30
+        self.deathTime = 40
         self.berryTime = 8
         self.told = 23
 

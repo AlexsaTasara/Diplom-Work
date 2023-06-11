@@ -12,6 +12,22 @@ stchosemapInf = [
     "Выберете карту используя стрелки вправо-влево.",
     "Chose map by using left-right arrow keys."
 ]
+stChooseBehaviorInf = [
+    "Выберете поведение используя стрелки вверх-вниз.",
+    "Chose behavior by using up-down arrow keys."
+]
+stcb00 = ["Фиксированный",
+          "Fixated"]
+stcb01 = ["[Фиксированный]",
+          "[Fixated]"]
+stcb10 = ["Коэволюция",
+          "Coevolution"]
+stcb11 = ["[Коэволюция]",
+          "[Coevolution]"]
+stcb20 = ["Роевой интеллект",
+          "Hive mind"]
+stcb21 = ["[Роевой интеллект]",
+          "[Hive mind]"]
 stControl1 = [
     "[Y] Информация",
     "[Y] Information"
@@ -204,6 +220,7 @@ sideMenuTexts = [
     ["Число растений: ", "Number of plants: "],
     ["Число объектов: ", "Number of objects: "],
     ["Число тактов: ", "Number of tact: "],
+    ["Общая энергия экосистемы: ", "Common sum of energy: "],
     ["Скорость наземных растений[j]: ", "Speed of earth plants[j]: "],
     ["Скорость морских растений[k]: ", "Speed of water plants[k]: "],
     ["Скорость модели[t]: ", "Speed of model[t]: "],

@@ -19,6 +19,8 @@ tileH = 32
 
 # Тип поведения агентов
 typeOfBehavior = 0
+# Выбор поведения агента
+chooseBehavior = 0
 
 # Язык
 userLang = lang["RUS"]
@@ -55,7 +57,8 @@ ctx = None
 
 
 # Какой режим включен
-mapChange = True
+cBehavior = True
+mapChange = False
 objectSpawn = False
 animalSpawn = False
 plantSpawn = False

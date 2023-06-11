@@ -107,7 +107,6 @@ stepEnergy = 12
 tanimation = 0.0
 pAttackEnergy = 0.8
 pSpawnEnergy = 0.7
-# Поменять для экспериментов
 
 # Информация для растений
 plantStatus = {

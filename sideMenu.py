@@ -21,15 +21,16 @@ def type_texts(game, screen, screen_width):
     textsss[5] = text_format(sideMenuTexts[5][ind.userLang] + str(len(game.eco.plants)), font6, 20, white)
     textsss[6] = text_format(sideMenuTexts[6][ind.userLang] + str(len(game.eco.objects)), font6, 20, white)
     textsss[7] = text_format(sideMenuTexts[7][ind.userLang] + str(ind.tak), font6, 20, white)
-    textsss[8] = text_format(sideMenuTexts[8][ind.userLang] + stPlS[ind.PLT][ind.userLang], font6, 20, white)
-    textsss[9] = text_format(sideMenuTexts[9][ind.userLang] + stPlS[ind.PLW][ind.userLang], font6, 20, white)
-    textsss[10] = text_format(sideMenuTexts[10][ind.userLang] + str(gameSpeeds[ind.currentSpeed]["name"]), font6, 20, white)
-    textsss[11] = text_format(sideMenuTexts[11][ind.userLang], font6, 20, white)
+    textsss[8] = text_format(sideMenuTexts[8][ind.userLang] + str(game.eco.totalEnergy), font6, 20, white)
+    textsss[9] = text_format(sideMenuTexts[9][ind.userLang] + stPlS[ind.PLT][ind.userLang], font6, 20, white)
+    textsss[10] = text_format(sideMenuTexts[10][ind.userLang] + stPlS[ind.PLW][ind.userLang], font6, 20, white)
+    textsss[11] = text_format(sideMenuTexts[11][ind.userLang] + str(gameSpeeds[ind.currentSpeed]["name"]), font6, 20, white)
     textsss[12] = text_format(sideMenuTexts[12][ind.userLang], font6, 20, white)
     textsss[13] = text_format(sideMenuTexts[13][ind.userLang], font6, 20, white)
+    textsss[14] = text_format(sideMenuTexts[14][ind.userLang], font6, 20, white)
     for i in range(len(textsss)):
         title_rects[i] = textsss[i].get_rect()
     for i in range(len(textsss)):
-        screen.blit(textsss[i], (screen_width - (title_rects[i][2]) - 40, 50 + i*30))
+        screen.blit(textsss[i], (screen_width - (title_rects[i][2]) - 40, 20 + i*30))
 
 

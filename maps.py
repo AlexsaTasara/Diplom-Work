@@ -42,7 +42,6 @@ mapW = {}
 mapH = {}
 gameMap = {}
 
-
 mapW[0] = 16
 mapH[0] = 16
 

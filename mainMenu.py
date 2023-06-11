@@ -247,6 +247,8 @@ class Game:
             animal_info_texts(screen, screen_width, self.eco.animals[ind.animInfo])
         if ind.mapChange:
             self.draw_map_change()
+        if ind.cBehavior:
+            self.draw_choose_behavior_model()
 
         pygame.display.flip()
 
@@ -399,7 +401,35 @@ class Game:
                         ind.mapNo = ind.mapCh
                         self.background_sprite.empty()
                         self.update_map()
-
+                # Меняем поведение
+                if ind.cBehavior:
+                    if event.key == pygame.K_q:
+                        ind.cBehavior = not ind.cBehavior
+                        ind.mapChange = True
+                    if event.key == pygame.K_0:
+                        ind.chooseBehavior = 0
+                    if event.key == pygame.K_1:
+                        ind.chooseBehavior = 1
+                    if event.key == pygame.K_2:
+                        ind.chooseBehavior = 2
+                    if (event.key == pygame.K_s) or (event.key == pygame.K_DOWN):
+                        if ind.chooseBehavior < 2:
+                            ind.chooseBehavior += 1
+                        else:
+                            ind.chooseBehavior = 0
+                    if (event.key == pygame.K_w) or (event.key == pygame.K_UP):
+                        if ind.chooseBehavior > 0:
+                            ind.chooseBehavior -= 1
+                        else:
+                            ind.chooseBehavior = 2
+                    # Выбрали поведение
+                    if event.key == pygame.K_e:
+                        ind.mapChange = True
+                        ind.cBehavior = False
+                        self.eco.clear()
+                        ind.typeOfBehavior = ind.chooseBehavior
+                        self.background_sprite.empty()
+                        self.update_map()
                 # Работа со временем
                 if (event.key == pygame.K_t) and (ind.currentSpeed != 0):
                     if ind.currentSpeed < 9:
@@ -500,9 +530,17 @@ class Game:
                 if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
-                    stat = self.eco.choosePurpose(self, h)
+
                     weightList = self.eco.createWeightListAgent(h)
-                    weightListHive = self.eco.createWeightListEco(self.eco.animals[h].species)
+                    weightListHive = self.eco.createWeightListEco(self.eco.animals[h].species, self.eco.animals[h].ecoT)
+                    if ind.typeOfBehavior == 0:
+                        stat = self.eco.choosePurpose(self, h)
+                    else:
+                        if ind.typeOfBehavior == 1:
+                            stat = self.eco.chooseCoevolutionPurpose(self, h, weightList)
+                        else:
+                            stat = self.eco.chooseCoevolutionPurpose(self, h, weightListHive)
+
                     self.eco.updateEnergy()
                     # Записываем информацию в exel документ
 
@@ -518,14 +556,49 @@ class Game:
         ind.tTime += math.floor(timeElapsed * gameSpeeds[ind.currentSpeed]["mult"])
         ind.lastFrameTime = currentFrameTime
 
+    # Рисуем меню выбора поведения
+    def draw_choose_behavior_model(self):
+        xsize = 480
+        ysize = 190
+        xxx1 = (screen_width - xsize) / 2
+        yyy1 = (screen_height - ysize) / 2
+        pygame.draw.rect(self.screen, gray, pygame.Rect(xxx1, yyy1, xsize, ysize))
+        text1 = text_format(stChooseBehaviorInf[ind.userLang], font6, 20, white)
+        if ind.chooseBehavior == 0:
+            text2 = text_format(stcb01[ind.userLang], font6, 20, white)
+            text3 = text_format(stcb10[ind.userLang], font6, 20, white)
+            text4 = text_format(stcb20[ind.userLang], font6, 20, white)
+        else:
+            if ind.chooseBehavior == 1:
+                text2 = text_format(stcb00[ind.userLang], font6, 20, white)
+                text3 = text_format(stcb11[ind.userLang], font6, 20, white)
+                text4 = text_format(stcb20[ind.userLang], font6, 20, white)
+            else:
+                text2 = text_format(stcb00[ind.userLang], font6, 20, white)
+                text3 = text_format(stcb10[ind.userLang], font6, 20, white)
+                text4 = text_format(stcb21[ind.userLang], font6, 20, white)
+        text5 = text_format(stmapchchose[ind.userLang], font6, 20, white)
+        title_rect1 = text1.get_rect()
+        title_rect2 = text2.get_rect()
+        title_rect3 = text3.get_rect()
+        title_rect4 = text4.get_rect()
+        title_rect5 = text5.get_rect()
+        screen.blit(text1, (screen_width / 2 - (title_rect1[2] / 2), yyy1 + 10))
+        screen.blit(text2, (screen_width / 2 - (title_rect2[2] / 2), yyy1 + 40))
+        screen.blit(text3, (screen_width / 2 - (title_rect3[2] / 2), yyy1 + 70))
+        screen.blit(text4, (screen_width / 2 - (title_rect4[2] / 2), yyy1 + 100))
+        screen.blit(text5, (screen_width / 2 - (title_rect5[2] / 2), yyy1 + 130))
+
+    # Рисуем меню выбора карты
     def draw_map_change(self):
-        xsize = 600
-        ysize = 240
+        xsize = 560
+        ysize = 200
         xxx1 = (screen_width - xsize) / 2
         yyy1 = (screen_height - ysize) / 2
         pygame.draw.rect(self.screen, gray, pygame.Rect(xxx1, yyy1, xsize, ysize))
         text1 = text_format(stchosemapInf[ind.userLang], font6, 20, white)
         ttt = stmapchoice9
+
         if ind.mapCh == 0:
             ttt = stmapchoice0
         else:
@@ -686,6 +759,4 @@ def gamess():
 
 if __name__ == '__main__':
     main_menu()
-    # gamess()
     pygame.quit()
-    # quit()
