@@ -90,6 +90,16 @@ def interacting(eco, game, iii):
                         result = eco.defenceAgainstEnemy(game, iii, indexA)
                         if result != -1:
                             return result
+            else:
+                aa1 = anim.attackEnergy()
+                # Будет ли существо убегать
+                aa2 = not eco.chooseEscape(anim.index)
+                aa3 = anim1.liveTime > anim1.tYang
+                if aa1 and aa2 and aa3:
+                    # Атакуем если противник совсем рядом в противном случае игнорируем
+                    result = eco.defenceAgainstEnemy(game, iii, indexA)
+                    if result != -1:
+                        return result
 
 
 def findPossiblePartner(game, anim):
@@ -115,7 +125,6 @@ def findPossiblePartner(game, anim):
     return -1
 
 
-# Вроде закончили с этим.
 def spawning(eco, game, iii):
     anim = eco.animals[iii]
     canSpawn = anim.spawnEnergy()
@@ -152,11 +161,16 @@ class Ecosystem(pygame.sprite.Sprite):
         self.relationship = {"Land": [[1.0] * 8 for i1 in range(8)],
                              "Water": [[1.0] * 8 for i1 in range(8)]}
         # Веса видов для роевого интеллекта
-        self.hiveWeights = {"Land": [[0.3, 0.3, 0.4, 0.5, 0.5] for i1 in range(8)],
-                            "Water": [[0.3, 0.3, 0.4, 0.5, 0.5] for i1 in range(8)]}
+        self.hiveWeights = {"Land": [[0.3, 0.3, 0.2, 0.2] for i1 in range(8)],
+                            "Water": [[0.3, 0.3, 0.2, 0.2] for i1 in range(8)]}
         self.totalEnergy = 0
         self.spEnergy = {"Land": [0, 0, 0, 0, 0, 0, 0, 0],
                          "Water": [0, 0, 0, 0, 0, 0, 0, 0]}
+        # Средняя сумма весов
+        self.totalWeightSum = {"Land": [[0.0, 0.0, 0.0, 0.0] for i1 in range(8)],
+                               "Water": [[0.0, 0.0, 0.0, 0.0] for i1 in range(8)]}
+        self.agentSpicesCount = {"Land": [0, 0, 0, 0, 0, 0, 0, 0],
+                                 "Water": [0, 0, 0, 0, 0, 0, 0, 0]}
 
     # Создание массива отношений между разными видами
     def createRelationships(self):
@@ -172,6 +186,51 @@ class Ecosystem(pygame.sprite.Sprite):
                     randRel = round(rand.random.uniform(0.4, 0.6), 2)
                     self.relationship["Water"][i1][j1] = copy.deepcopy(randRel)
                     self.relationship["Water"][j1][i1] = copy.deepcopy(randRel)
+
+    # Задаем случайные веса для роя
+    def createWeighstHive(self):
+        for bbb in range(8):
+            rndw1 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw2 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw3 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw4 = round((1 - rndw1 - rndw2 - rndw3), 2)
+            self.hiveWeights["Land"][bbb][0] = rndw1
+            self.hiveWeights["Land"][bbb][1] = rndw2
+            self.hiveWeights["Land"][bbb][2] = rndw3
+            self.hiveWeights["Land"][bbb][3] = rndw4
+        for bbb in range(8):
+            rndw1 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw2 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw3 = round(rand.random.uniform(0.2, 0.3), 2)
+            rndw4 = round((1 - rndw1 - rndw2 - rndw3), 2)
+            self.hiveWeights["Water"][bbb][0] = rndw1
+            self.hiveWeights["Water"][bbb][1] = rndw2
+            self.hiveWeights["Water"][bbb][2] = rndw3
+            self.hiveWeights["Water"][bbb][3] = rndw4
+
+    # Средняя сумма весов
+    def midSumOfWeights(self):
+        self.agentSpicesCount = {"Land": [0, 0, 0, 0, 0, 0, 0, 0],
+                                 "Water": [0, 0, 0, 0, 0, 0, 0, 0]}
+        self.totalWeightSum = {"Land": [[0.0, 0.0, 0.0, 0.0] for i1 in range(8)],
+                               "Water": [[0.0, 0.0, 0.0, 0.0] for i1 in range(8)]}
+        for ii in self.animals:
+            am = self.animals[ii]
+            self.totalWeightSum[am.ecoT][am.species][0] += am.eatWeight
+            self.totalWeightSum[am.ecoT][am.species][1] += am.birthWeight
+            self.totalWeightSum[am.ecoT][am.species][2] += am.interactionWeight
+            self.agentSpicesCount[am.ecoT][am.species] += 1
+        for ii in range(8):
+            jj = self.agentSpicesCount["Land"][ii]
+            if jj != 0:
+                self.totalWeightSum["Land"][ii][0] = self.totalWeightSum["Land"][ii][0] / jj
+                self.totalWeightSum["Land"][ii][1] = self.totalWeightSum["Land"][ii][1] / jj
+                self.totalWeightSum["Land"][ii][2] = self.totalWeightSum["Land"][ii][2] / jj
+            jj = self.agentSpicesCount["Water"][ii]
+            if jj != 0:
+                self.totalWeightSum["Water"][ii][0] = self.totalWeightSum["Water"][ii][0] / jj
+                self.totalWeightSum["Water"][ii][1] = self.totalWeightSum["Water"][ii][1] / jj
+                self.totalWeightSum["Water"][ii][2] = self.totalWeightSum["Water"][ii][2] / jj
 
     # Подсчитываем общую энергию системы экосистемы
     def updateEnergy(self):
@@ -357,6 +416,9 @@ class Ecosystem(pygame.sprite.Sprite):
                 plnt1.deleteAtMap(iii, j, ind.mapNo)
                 anim1.deleteAtMap(iii, j, ind.mapNo)
                 obj1.deleteAtMap(iii, j, ind.mapNo)
+        ind.tak = 0
+        self.createWeighstHive()
+        self.createRelationships()
 
     def positionsXY(self, agent1, agent2):
         poX = self.animals[agent1].tileTo[0] - self.animals[agent2].tileFrom[0]
@@ -382,41 +444,67 @@ class Ecosystem(pygame.sprite.Sprite):
 
     # Ребаланс весов
     def weightRebalance(self, iii, balance, what):
+        a1 = self.animals[iii].birthWeight
+        a2 = self.animals[iii].eatWeight
+        a3 = self.animals[iii].interactionWeight
         if what == "birth":
-            self.animals[iii].birthWeight += balance
-            if self.animals[iii].eatWeight > (balance / 2):
-                self.animals[iii].eatWeight -= (balance / 2)
-            else:
-                self.animals[iii].birthWeight -= (balance / 2)
-            if self.animals[iii].interactionWeight > (balance / 2):
-                self.animals[iii].interactionWeight -= (balance / 2)
-            else:
-                self.animals[iii].birthWeight -= (balance / 2)
+            if 0 < (a1 + balance) < 1:
+                self.animals[iii].birthWeight += balance
+                if 0 < (a2 - (balance / 2)) < 1:
+                    self.animals[iii].eatWeight -= (balance / 2)
+                else:
+                    self.animals[iii].birthWeight -= (balance / 2)
+                if 0 < (a3 - (balance / 2)) < 1:
+                    self.animals[iii].interactionWeight -= (balance / 2)
+                else:
+                    self.animals[iii].birthWeight -= (balance / 2)
         if what == "inter":
-            self.animals[iii].interactionWeight += balance
-            if self.animals[iii].eatWeight > (balance / 2):
-                self.animals[iii].eatWeight -= (balance / 2)
-            else:
-                self.animals[iii].interactionWeight -= (balance / 2)
-            if self.animals[iii].birthWeight > (balance / 2):
-                self.animals[iii].birthWeight -= (balance / 2)
-            else:
-                self.animals[iii].interactionWeight -= (balance / 2)
+            if 0 < (a3 + balance) < 1:
+                self.animals[iii].interactionWeight += balance
+                if 0 < (a2 - (balance / 2)) < 1:
+                    self.animals[iii].eatWeight -= (balance / 2)
+                else:
+                    self.animals[iii].interactionWeight -= (balance / 2)
+                if 0 < (a1 - (balance / 2)) < 1:
+                    self.animals[iii].birthWeight -= (balance / 2)
+                else:
+                    self.animals[iii].interactionWeight -= (balance / 2)
         if what == "eat":
-            self.animals[iii].eatWeight += balance
-            if self.animals[iii].birthWeight > (balance / 2):
-                self.animals[iii].birthWeight -= (balance / 2)
+            if 0 < (a2 + balance) < 1:
+                self.animals[iii].eatWeight += balance
+                if 0 < (a1 - (balance / 2)) < 1:
+                    self.animals[iii].birthWeight -= (balance / 2)
+                else:
+                    self.animals[iii].eatWeight -= (balance / 2)
+                if 0 < (a3 - (balance / 2)) < 1:
+                    self.animals[iii].interactionWeight -= (balance / 2)
+                else:
+                    self.animals[iii].eatWeight -= (balance / 2)
+
+    def hiveWeightRebalance(self, sp, balance, what, ecoT):
+        if what == 0:
+            ch1 = 1
+            ch2 = 2
+        else:
+            if what == 1:
+                ch1 = 0
+                ch2 = 2
             else:
-                self.animals[iii].eatWeight -= (balance / 2)
-            if self.animals[iii].interactionWeight > (balance / 2):
-                self.animals[iii].interactionWeight -= (balance / 2)
+                ch1 = 0
+                ch2 = 1
+        a1 = self.hiveWeights[ecoT][sp][what]
+        a2 = self.hiveWeights[ecoT][sp][ch1]
+        a3 = self.hiveWeights[ecoT][sp][ch2]
+        if 0 < (a1 + balance) < 1:
+            self.hiveWeights[ecoT][sp][what] += balance
+            if 0 < (a2 - (balance / 2)) < 1:
+                self.hiveWeights[ecoT][sp][ch1] -= (balance / 2)
             else:
-                self.animals[iii].eatWeight -= (balance / 2)
-        # Доделать баланс ягод и тела
-        if what == "body":
-            a1 = 1
-        if what == "berry":
-            a1 = 1
+                self.hiveWeights[ecoT][sp][what] -= (balance / 2)
+            if 0 < (a3 - (balance / 2)) < 1:
+                self.hiveWeights[ecoT][sp][ch2] -= (balance / 2)
+            else:
+                self.hiveWeights[ecoT][sp][what] -= (balance / 2)
 
     # Функция возвращения индекса ближайшего врага-животного из списка для атаки
     def attacked(self, game, anim):
@@ -539,7 +627,10 @@ class Ecosystem(pygame.sprite.Sprite):
             if not (self.lookWay(game, iii, [poX, poY])):
                 self.animals[indexA].attacked()
                 self.animals[iii].spriteDirect = 8 + self.animals[iii].courseNext
-                self.weightRebalance(iii, 0.008, "inter")
+                if ind.typeOfBehavior == 1:
+                    self.weightRebalance(iii, 0.008, "inter")
+                if ind.typeOfBehavior == 2:
+                    self.hiveWeightRebalance(self.animals[iii].species, 0.008, 2, self.animals[iii].ecoT)
                 if self.animals[iii].ecoT == self.animals[indexA].ecoT:
                     self.relationshipRebalance(self.animals[iii].ecoT, self.animals[iii].species,
                                                self.animals[indexA].species, -0.02)
@@ -562,7 +653,10 @@ class Ecosystem(pygame.sprite.Sprite):
                 q += 1
             indexP = self.indPlant(game.view.nearFood[q])
             food1 = self.plants[indexP].eat()
-            self.weightRebalance(iii, 0.002, "eat")
+            if ind.typeOfBehavior == 1:
+                self.weightRebalance(iii, 0.002, "eat")
+            if ind.typeOfBehavior == 2:
+                self.hiveWeightRebalance(self.animals[iii].species, 0.002, 0, self.animals[iii].ecoT)
             return statusAnim["EAT"]
         return -1
 
@@ -572,7 +666,10 @@ class Ecosystem(pygame.sprite.Sprite):
         if not (self.lookWay(game, iii, [poX, poY])):
             self.animals[iii].statusUpdate(statusAnim["EAT"])
             self.animals[indexA].eat()
-            self.weightRebalance(iii, 0.002, "eat")
+            if ind.typeOfBehavior == 1:
+                self.weightRebalance(iii, 0.002, "eat")
+            if ind.typeOfBehavior == 2:
+                self.hiveWeightRebalance(self.animals[iii].species, 0.002, 0, self.animals[iii].ecoT)
             return statusAnim["EAT"]
         return -1
 
@@ -594,18 +691,29 @@ class Ecosystem(pygame.sprite.Sprite):
         if delta < 2:
             if len(game.view.nearClear) == 0:
                 self.animals[iii].abortion()
-                self.weightRebalance(iii, -0.004, "birth")
-                self.weightRebalance(indexA, -0.004, "birth")
+                if ind.typeOfBehavior == 1:
+                    self.weightRebalance(iii, -0.004, "birth")
+                    self.weightRebalance(indexA, -0.004, "birth")
+                if ind.typeOfBehavior == 2:
+                    self.hiveWeightRebalance(self.animals[iii].species, -0.004, 1, self.animals[iii].ecoT)
+                    self.hiveWeightRebalance(self.animals[indexA].species, -0.004, 1, self.animals[indexA].ecoT)
             else:
                 animbaby = Animal(game)
                 animbaby.Born(self.animals[iii], self.animals[indexA], game.view.nearClear[0][0],
                               game.view.nearClear[0][1])
-
-                self.weightRebalance(iii, 0.004, "birth")
-                self.weightRebalance(indexA, 0.004, "birth")
+                if ind.typeOfBehavior == 1:
+                    self.weightRebalance(iii, 0.004, "birth")
+                    self.weightRebalance(indexA, 0.004, "birth")
+                if ind.typeOfBehavior == 2:
+                    self.hiveWeightRebalance(self.animals[iii].species, 0.004, 1, self.animals[iii].ecoT)
+                    self.hiveWeightRebalance(self.animals[indexA].species, 0.004, 1, self.animals[indexA].ecoT)
                 if not self.animals[iii].sameSpecies(self.animals[indexA]):
-                    self.weightRebalance(iii, 0.004, "inter")
-                    self.weightRebalance(indexA, 0.004, "inter")
+                    if ind.typeOfBehavior == 1:
+                        self.weightRebalance(iii, 0.004, "inter")
+                        self.weightRebalance(indexA, 0.004, "inter")
+                    if ind.typeOfBehavior == 2:
+                        self.hiveWeightRebalance(self.animals[iii].species, 0.004, 2, self.animals[iii].ecoT)
+                        self.hiveWeightRebalance(self.animals[indexA].species, 0.004, 2, self.animals[indexA].ecoT)
                     self.relationshipRebalance(self.animals[iii].ecoT, self.animals[iii].species,
                                                self.animals[indexA].species, 0.1)
                 animbaby.ecoAddType(self.animals[indexA].ecoT, game)
@@ -779,8 +887,8 @@ class Ecosystem(pygame.sprite.Sprite):
     def createWeightListAgent(self, iii):
         anim = self.animals[iii]
         WeightList = {"Eat": anim.eatWeight,
-                      "Interact": anim.interactionWeight,
-                      "Spawn": anim.birthWeight
+                      "Spawn": anim.birthWeight,
+                      "Interact": anim.interactionWeight
                       }
         WeightList_by_goals = sorted(WeightList.items(), key=lambda x: x[1], reverse=True)
         converted_dict = dict(WeightList_by_goals)
@@ -789,8 +897,8 @@ class Ecosystem(pygame.sprite.Sprite):
     def createWeightListEco(self, iii, ecoT):
         list1 = self.hiveWeights[ecoT][iii]
         WeightList = {"Eat": list1[0],
-                      "Interact": list1[1],
-                      "Spawn": list1[2]
+                      "Spawn": list1[1],
+                      "Interact": list1[2]
                       }
         WeightList_by_goals = sorted(WeightList.items(), key=lambda x: x[1], reverse=True)
         converted_dict = dict(WeightList_by_goals)
@@ -851,8 +959,12 @@ class Ecosystem(pygame.sprite.Sprite):
                                 if self.chooseEscape(indexA):
                                     if len(game.view.nearClear) != 0:
                                         run_away = self.runAwayRoad(game, j)
-                                        result = self.walkToCoordinate(game, indexA, run_away)
-                                        return result
+                                        if run_away != [-1, -1]:
+                                            result = self.walkToCoordinate(game, indexA, run_away)
+                                            return result
+                                        else:
+                                            result = self.lowEnergySleep(indexA)
+                                            return result
                                     else:
                                         result = self.lowEnergySleep(indexA)
                                         return result

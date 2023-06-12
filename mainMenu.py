@@ -91,12 +91,16 @@ class Game:
         self.mapTileData = None
         self.save = None
         self.workbook = None
-        self.worksheetEnergy = None
-        self.worksheetMaxEnergy = None
-        self.worksheetLiveTime = None
-        self.worksheetStatus = None
         self.worksheetNumbers = None
+        self.worksheetSpeciesNumbersLand = None
+        self.worksheetSpeciesNumbersWater = None
         self.worksheetTotalEnergy = None
+        self.worksheetSpeciesEnergyLand = None
+        self.worksheetSpeciesEnergyWater = None
+        self.worksheetWeightSumLand = None
+        self.worksheetWeightSumWater = None
+        self.worksheetWeightSpeciesLand = None
+        self.worksheetWeightSpeciesWater = None
         self.eCol = None
         pygame.init()
         os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -180,15 +184,20 @@ class Game:
         self.view = pov.PointOfView()
         self.save = sal.SaveAndLoad()
         self.workbook = xlsxwriter.Workbook('AgentsStatuses.xlsx')
-        self.worksheetEnergy = self.workbook.add_worksheet()
-        self.worksheetMaxEnergy = self.workbook.add_worksheet()
-        self.worksheetLiveTime = self.workbook.add_worksheet()
-        self.worksheetStatus = self.workbook.add_worksheet()
         self.worksheetNumbers = self.workbook.add_worksheet()
+        self.worksheetSpeciesNumbersLand = self.workbook.add_worksheet()
+        self.worksheetSpeciesNumbersWater = self.workbook.add_worksheet()
         self.worksheetTotalEnergy = self.workbook.add_worksheet()
+        self.worksheetSpeciesEnergyLand = self.workbook.add_worksheet()
+        self.worksheetSpeciesEnergyWater = self.workbook.add_worksheet()
+        self.worksheetWeightSumLand = self.workbook.add_worksheet()
+        self.worksheetWeightSumWater = self.workbook.add_worksheet()
+        self.worksheetWeightSpeciesLand = self.workbook.add_worksheet()
+        self.worksheetWeightSpeciesWater = self.workbook.add_worksheet()
 
         currentmap = maps.gameMap[ind.mapNo]
         self.eco.createRelationships()
+        self.eco.createWeighstHive()
         ind.tileW, ind.tileH = set_tile_size(currentmap)
         self.spriteupdate()
         for row, tiles in enumerate(currentmap):
@@ -530,7 +539,6 @@ class Game:
                 if (stat != statusAnim["ZERO"]) and (stat != statusAnim["DEATH"]):
                     self.view.updateLook(self.eco.animals[h].tileFrom, self.eco.animals[h].ecoT, self.eco)
                     self.view.updateLists(self.eco.animals[h].myCourse(), self.eco.animals[h].tileFrom, self.eco)
-
                     weightList = self.eco.createWeightListAgent(h)
                     weightListHive = self.eco.createWeightListEco(self.eco.animals[h].species, self.eco.animals[h].ecoT)
                     if ind.typeOfBehavior == 0:
@@ -541,15 +549,53 @@ class Game:
                         else:
                             stat = self.eco.chooseCoevolutionPurpose(self, h, weightListHive)
 
-                    self.eco.updateEnergy()
-                    # Записываем информацию в exel документ
+            self.eco.updateEnergy()
+            self.eco.midSumOfWeights()
+            # Записываем информацию в exel документ
+            # Количество всех агентов
+            self.worksheetNumbers.write(0, self.eCol, self.eCol)
+            self.worksheetNumbers.write(1, self.eCol, len(self.eco.animals))
+            # Количество наземных агентов по типам
+            self.worksheetSpeciesNumbersLand.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                self.worksheetSpeciesNumbersLand.write(i + 1, self.eCol, self.eco.agentSpicesCount["Land"][i])
+            # Количество водных агентов по типам
+            self.worksheetSpeciesNumbersWater.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                self.worksheetSpeciesNumbersWater.write(i + 1, self.eCol, self.eco.agentSpicesCount["Water"][i])
+            # Количество энергии между всеми агентами
+            self.worksheetTotalEnergy.write(0, self.eCol, self.eCol)
+            self.worksheetTotalEnergy.write(1, self.eCol, self.eco.totalEnergy)
+            # Количество энергии наземных агентов по типам
+            self.worksheetSpeciesEnergyLand.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                self.worksheetSpeciesEnergyLand.write(i + 1, self.eCol, self.eco.spEnergy["Land"][i])
+            # Количество энергии водных агентов по типам
+            self.worksheetSpeciesEnergyWater.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                self.worksheetSpeciesEnergyWater.write(i + 1, self.eCol, self.eco.spEnergy["Water"][i])
+            # Средняя сумма весов наземных агентов по типам
+            self.worksheetWeightSumLand.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                for j in range(3):
+                    self.worksheetWeightSumLand.write(i * 4 + j + 1, self.eCol, self.eco.totalWeightSum["Land"][i][j])
+            # Средняя сумма весов водных агентов по типам
+            self.worksheetWeightSumWater.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                for j in range(3):
+                    self.worksheetWeightSumWater.write(i * 4 + j + 1, self.eCol, self.eco.totalWeightSum["Water"][i][j])
+            # Роевые веса наземных агентов по типам
+            self.worksheetWeightSpeciesLand.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                for j in range(3):
+                    self.worksheetWeightSpeciesLand.write(i * 4 + j + 1, self.eCol, self.eco.hiveWeights["Land"][i][j])
+            # Роевые веса водных агентов по типам
+            self.worksheetWeightSpeciesWater.write(0, self.eCol, self.eCol)
+            for i in range(8):
+                for j in range(3):
+                    self.worksheetWeightSpeciesWater.write(i * 4 + j + 1, self.eCol,
+                                                           self.eco.hiveWeights["Water"][i][j])
 
-                    self.worksheetEnergy.write(h, self.eCol, self.eco.animals[h].energy)
-                    self.worksheetMaxEnergy.write(h, self.eCol, self.eco.animals[h].maxEnergy)
-                    self.worksheetLiveTime.write(h, self.eCol, self.eco.animals[h].liveTime)
-                    self.worksheetStatus.write(h, self.eCol, self.eco.animals[h].status)
-                    self.worksheetTotalEnergy.write(h, self.eCol, self.eco.totalEnergy)
-            self.worksheetNumbers.write(0, self.eCol, len(self.eco.animals))
             self.eCol = self.eCol + 1
             ind.tTime = 0
             ind.tak += 1
@@ -671,7 +717,6 @@ def stop_start_model():
 def main_menu():
     menu = True
     game_emulation = True
-    draw_emulation = False
     option_list = [
         "start new",
         "load old",

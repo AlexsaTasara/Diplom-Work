@@ -34,16 +34,9 @@ class Animal(pygame.sprite.Sprite):
 
         # Веса агента
         self.birthWeight = 0.0
-        self.walkWeight = 0.0 #Может убрать?
+        self.walkWeight = 0.0
         self.eatWeight = 0.0
         self.interactionWeight = 0.0
-        self.attackWeight = 0.0
-        self.runWeight = 0.0
-
-        # Веса пищи
-        self.berryWeight = 0.0
-        self.bodyWeight = 0.0
-        self.fightBodyWeight = 0.0
 
         # Спрайты
         self.groups = game.all_sprites
@@ -172,13 +165,6 @@ class Animal(pygame.sprite.Sprite):
         self.walkWeight = round((anim1.walkWeight+anim2.walkWeight)/2, 3)
         self.eatWeight = round((anim1.eatWeight+anim2.eatWeight)/2, 3)
         self.interactionWeight = round((anim1.interactionWeight + anim2.interactionWeight) / 2, 3)
-        self.attackWeight = round((anim1.attackWeight+anim2.attackWeight)/2, 3)
-        self.runWeight = round((anim1.runWeight+anim2.runWeight)/2, 3)
-
-        # Веса пищи
-        self.berryWeight = round((anim1.berryWeight+anim2.berryWeight)/2, 3)
-        self.bodyWeight = round((anim1.bodyWeight+anim2.bodyWeight)/2, 3)
-        self.fightBodyWeight = round((anim1.fightBodyWeight+anim2.fightBodyWeight)/2, 3)
 
         self.energy = copy.deepcopy(self.startEnergy)
         self.maxEnergy = copy.deepcopy(self.startEnergy)
